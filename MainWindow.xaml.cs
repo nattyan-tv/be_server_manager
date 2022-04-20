@@ -14,14 +14,26 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace bedrock_server_manager
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
     /// </summary>
+    /// 
+    
     public partial class MainWindow : Window
     {
+        // https://www.minecraft.net/en-us/download/server/bedrock
+        // https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip
+        class ConfigData
+        {
+            public string name { get; set; }
+            public string location { get; set; }
+        }
+
         private void textBoxPrice_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !new Regex("[0-9.]").IsMatch(e.Text);
@@ -41,6 +53,41 @@ namespace bedrock_server_manager
         public MainWindow()
         {
             InitializeComponent();
+            if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
+            {
+                ConfigData cfgDATA = new ConfigData
+                {
+                    name = "Dedicated Server",
+                    location = @"C:\",
+                };
+                string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
+                File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
+            }
+            try
+            {
+                ConfigData cfgDATA = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                }
+                サーバー名.Content = cfgDATA.name;
+                serverLocation.Text = cfgDATA.location;
+                // Pythonでバージョン系を取得するプログラム
+                if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
+                {
+                    ;
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("設定ファイル読み込み時にエラーが発生しました。\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+            
+            
+
+
         }
 
         private void changeServerLocation(object sender, RoutedEventArgs e)
