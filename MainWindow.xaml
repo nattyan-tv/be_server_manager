@@ -5,8 +5,195 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:bedrock_server_manager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="BE Server Manager" Height="580" Width="1000">
+
     <Grid>
-        
+        <Grid>
+            <Menu VerticalAlignment="Top" Height="18">
+
+                <MenuItem Header="ファイル">
+                    <MenuItem Header="設定を保存する"/>
+                    <MenuItem Header="終了"/>
+                </MenuItem>
+
+            </Menu>
+        </Grid>
+        <Grid Height="118" VerticalAlignment="Top" Background="#FFF3FFF5" Margin="0,18,0,0">
+            <Label x:Name="サーバー名" Content="サーバー名：Dedicated Server" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI" Width="701"/>
+            <Label x:Name="バージョン" Content="バージョン：v0.0.0" HorizontalAlignment="Left" Margin="10,46,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI" Width="701"/>
+            <Label x:Name="ファイル" Content="ファイル場所：" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
+            <TextBox x:Name="serverLocation" IsReadOnly="True" Margin="118,82,181,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="/"/>
+            <Button Content="起動" Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="74" Height="31" FontSize="16"/>
+            <Button Content="更新" Margin="0,46,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="74" Height="31" FontSize="16"/>
+            <Button Content="保存" Margin="0,82,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="74" Height="31" FontSize="16"/>
+            <Button Content="変更" Margin="0,82,95,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="74" Height="31" FontSize="16" Click="changeServerLocation"/>
+
+        </Grid>
+        <ScrollViewer Margin="0,136,0,0">
+            <Grid Background="#FFF7E1D8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0" Margin="10,10,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="サーバー名：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="server_name" Margin="94,4,10,4" VerticalContentAlignment="Center" ToolTip="サーバー欄に表示されるサーバーの名前です。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,10,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="ゲームモード：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="105,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバー内のゲームモードです。">
+                        <ComboBoxItem Content="サバイバル" ToolTip="クラシックなマインクラフトで、死なないように生き延びます。"></ComboBoxItem>
+                        <ComboBoxItem Content="クリエイティブ" ToolTip="基本的に死なず、ブロックなどを自由に出すことができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="アドベンチャー" ToolTip="ブロックの破壊/設置などが一切できないモードです。"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,55,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="ワールド広さ：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox Margin="109,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="指定したブロック数を半径としてワールドボーダーが引かれます。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,55,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="PvP/PvE：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="93,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバー内でのPvP/PvEの設定です。">
+                        <ComboBoxItem Content="PvP" ToolTip="プレイヤー間のダメージを有効にします。"></ComboBoxItem>
+                        <ComboBoxItem Content="PvE" ToolTip="プレイヤー間のダメージを無効にします。"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,100,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="難易度：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="84,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバー内のゲーム難易度です。">
+                        <ComboBoxItem Content="ピースフル" ToolTip="敵モブが一切スポーンしない難易度です。"></ComboBoxItem>
+                        <ComboBoxItem Content="イージー" ToolTip="易しい難易度です。"></ComboBoxItem>
+                        <ComboBoxItem Content="ノーマル" ToolTip="通常の難易度です。"></ComboBoxItem>
+                        <ComboBoxItem Content="ハード" ToolTip="難しい難易度です。"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,100,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="最大プレイヤー数：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="max_player" Margin="142,4,41,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="サーバーに入ることができる最大人数を設定します。"></TextBox>
+                    <Label Content="人" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="0,0,10,0" HorizontalAlignment="Right" Width="26"/>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,145,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="IPv4ポート：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="ipv4_port" Margin="100,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="IPv4で接続するためのポートを指定します。\n通常は19132です。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,145,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="IPv6ポート：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="ipv6_port" Margin="100,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="IPv6で接続するためのポートを指定します。\n通常は19133又は、IPv4ポート+1です。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,190,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="表示チャンク数：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="view_distance" Margin="131,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="サーバー側での表示することができる最大のチャンク数を指定します。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,190,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="無操作タイムアウト時間：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="player_idle_timeout" Margin="187,4,41,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="プレイヤーが一定時間操作しなかった場合にプレイヤーを自動的にキックします。"></TextBox>
+                    <Label Content="分" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="0,0,10,0" HorizontalAlignment="Right" Width="26"/>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,235,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="最大CPUスレッド数：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="max_threads" Margin="159,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="サーバープログラムが使用できる最大スレッド数です。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,235,10,0" Height="40" VerticalAlignment="Top">
+                    <Label x:Name="tick_distance" Content="シミュレーション距離：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="157,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="プレイヤーからどこまでのチャンクを処理するかを指定します。">
+                        <ComboBoxItem Content="4"></ComboBoxItem>
+                        <ComboBoxItem Content="5"></ComboBoxItem>
+                        <ComboBoxItem Content="6"></ComboBoxItem>
+                        <ComboBoxItem Content="7"></ComboBoxItem>
+                        <ComboBoxItem Content="8"></ComboBoxItem>
+                        <ComboBoxItem Content="9"></ComboBoxItem>
+                        <ComboBoxItem Content="10"></ComboBoxItem>
+                        <ComboBoxItem Content="11"></ComboBoxItem>
+                        <ComboBoxItem Content="12"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,280,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="コマンドを許可：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="126,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバー内でチートコマンドの使用を許可するかの設定です。">
+                        <ComboBoxItem Content="有効"></ComboBoxItem>
+                        <ComboBoxItem Content="無効"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,280,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="ホワイトリスト：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="117,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバーにて特定のユーザーのみの参加を許可する場合は有効にします。">
+                        <ComboBoxItem Content="有効"></ComboBoxItem>
+                        <ComboBoxItem Content="無効"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,370,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="参加者の権限：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="129,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバーに参加したユーザーの権限を設定することができます。">
+                        <ComboBoxItem Content="オペレーター" ToolTip="管理権限を持ったユーザーで、ワールド設定などを変更することができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="メンバー" ToolTip="通常の権限をもったユーザーで、通常のプレイを行うことができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="ビジター" ToolTip="一切の権限を持たず、ブロックの破壊/設置や攻撃ができず、観戦のみすることができます。"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,325,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="ログを残す：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="101,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバーにてエラーなどが発生した場合にログを残します。">
+                        <ComboBoxItem Content="有効"></ComboBoxItem>
+                        <ComboBoxItem Content="無効"></ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,325,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="Xbox Liveログイン要求：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="181,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="MinecraftでMicrosoftアカウントでログインしたユーザーのみを参加させる場合は有効にします。">
+                        <ComboBoxItem Content="有効"/>
+                        <ComboBoxItem Content="無効"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,370,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="テクスチャの強制：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="140,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバーにてカスタムテクスチャを導入している場合に、サーバー参加時にそのテクスチャの利用を強制するかの設定です。">
+                        <ComboBoxItem Content="有効"/>
+                        <ComboBoxItem Content="無効"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,415,9,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="ネットワークペイロード：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="network_payload" Margin="159,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="未加工のネットワークペイロードの圧縮する最小サイズです。\nデフォルトの1が推奨です。\n(0-65535)"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="11,415,10,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="ゲーム内とサーバー内の位置を合わせる：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <ComboBox Margin="274,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="ゲーム内でのプレイヤーの位置と、サーバー内でのプレイヤーの位置がずれた場合に、それを修正します。\nなお、BEでは試験段階で、無効が推奨です。">
+                        <ComboBoxItem Content="有効"/>
+                        <ComboBoxItem Content="無効"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,460,9,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="位置ズレ検知閾値：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="move_score" Margin="156,4,70,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="位置がズレたと判定する閾値です。"></TextBox>
+                    <Label Content="ブロック" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="0,0,10,0" HorizontalAlignment="Right" Width="55"/>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,460,9,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="位置ズレ検知間隔：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="move_time" Margin="156,4,46,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="位置のズレを検知する感覚です。"></TextBox>
+                    <Label Content="ms" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="0,0,10,0" HorizontalAlignment="Right" Width="30"/>
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,505,9,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="異常動作検知閾値：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="dang_move_score" Margin="164,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="プレイヤーの異常な動作を検知する閾値です。"></TextBox>
+                </Grid>
+                <Grid Grid.Column="1" Margin="10,505,9,0" Height="40" VerticalAlignment="Top">
+                    <Label Content="サーバーワールド名：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
+                    <TextBox x:Name="data_location" Margin="145,4,10,4" VerticalContentAlignment="Center" ToolTip="サーバーのワールドの名前を指定します。\nこの名前でワールドファイルが作成されます。"></TextBox>
+                </Grid>
+
+                <Grid Grid.Column="0" Grid.ColumnSpan="2" Margin="10,560,9,0" Height="121" VerticalAlignment="Top">
+                    <Label Content="MOTDの設定：" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI" Margin="10,10,0,0"/>
+                    <TextBox x:Name="motd" Margin="132,10,10,0" VerticalContentAlignment="Center" ToolTip="MOTDの設定です。\n下部のリンクで詳しく解説されています。" Height="70" VerticalAlignment="Top"></TextBox>
+                    <Label HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top">
+                        <Span>
+                            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://minecraft.tools/en/motd.php">MOTDとは？</Hyperlink> /
+                            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://minecraft.tools/en/motd.php">MOTDの作成が楽に行えるサイト</Hyperlink>
+                        </Span>
+                    </Label>
+
+                </Grid>
+
+            </Grid>
+        </ScrollViewer>
+
     </Grid>
 </Window>
