@@ -15,10 +15,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
+using System.IO.Compression;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
 using System.Diagnostics;
+
 
 namespace bedrock_server_manager
 {
@@ -64,6 +66,45 @@ namespace bedrock_server_manager
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(e.Uri.ToString());
+        }
+
+        public static void FileCopy(string sourcePath, string destinationPath, bool rewrite)
+        {
+
+            if (Directory.Exists(sourcePath) == false)
+            {
+                return;
+            }
+
+            File.Copy(sourcePath, destinationPath, rewrite);
+
+        }
+
+        public static void DirectoryCopy(string sourcePath, string destinationPath)
+        {
+            DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
+            DirectoryInfo destinationDirectory = new DirectoryInfo(destinationPath);
+
+            if (sourceDirectory.Exists == false)
+            {
+                return;
+            }
+
+            if (destinationDirectory.Exists == false)
+            {
+                destinationDirectory.Create();
+                destinationDirectory.Attributes = sourceDirectory.Attributes;
+            }
+
+            foreach (FileInfo fileInfo in sourceDirectory.GetFiles())
+            {
+                fileInfo.CopyTo(destinationDirectory.FullName + @"\" + fileInfo.Name, true);
+            }
+
+            foreach (System.IO.DirectoryInfo directoryInfo in sourceDirectory.GetDirectories())
+            {
+                DirectoryCopy(directoryInfo.FullName, destinationDirectory.FullName + @"\" + directoryInfo.Name);
+            }
         }
 
         public MainWindow()
@@ -178,6 +219,135 @@ namespace bedrock_server_manager
                     e.Cancel = true;
                 }
             }
+        }
+
+        async private void updateServer(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult ans = MessageBox.Show("アップデートを実行してもよろしいですか？\nアップデート作業中はBE Server Managerは操作できなくなります。\nサーバーが実行されている場合は停止します。", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
+            Console.WriteLine(ans);
+            if (ans != MessageBoxResult.OK)
+            {
+                return;
+            }
+
+            Process[] ps = Process.GetProcessesByName("bedrock_server");
+
+            foreach (Process p in ps)
+            {
+                p.CloseMainWindow();
+
+                p.WaitForExit(10000);
+                if (p.HasExited)
+                {
+                    Console.WriteLine("Exit!!!");
+                }
+                else
+                {
+                    MessageBox.Show("サーバープログラムが終了しませんでした。\n手動で停止しなおすか、しばらく待った後に再度やり直してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    return;
+                }
+            }
+            Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\tmp");
+
+            ConfigData cfgDATA = null;
+            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+            }
+
+
+            FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\permissions.json", true);
+            FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\server.properties", true);
+            FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\allowlist.json", true);
+            FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\whitelist.json", true);
+            DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\worlds");
+
+            WebClient mywebClient = new WebClient();
+            Console.WriteLine("Start task...");
+            var dlLink = new Process
+            {
+                StartInfo = new ProcessStartInfo("python/BE_Server_Manager_MAIN.exe")
+                {
+                    Arguments = "-getLatest",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+            dlLink.Start();
+            StreamReader dl = dlLink.StandardOutput;
+            downloadLink = dl.ReadLine().Replace("\r", "").Replace("\n", "");
+            dlLink.WaitForExit();
+            dlLink.Close();
+            mywebClient.DownloadFile(downloadLink, @"tmp\Minecraft_BedrockServer.zip");
+            DirectoryInfo gamedir = new DirectoryInfo(@cfgDATA.location);
+            try
+            {
+                gamedir.Delete(true);
+                Directory.CreateDirectory(@cfgDATA.location);
+                ZipFile.ExtractToDirectory(@"tmp\Minecraft_BedrockServer.zip", @cfgDATA.location);
+            }
+            catch (IOException)
+            {
+                MessageBox.Show("アップデート中にエラーが発生しました。\nセーブデータのバックアップは「" + @AppDomain.CurrentDomain.BaseDirectory + @"\tmp" + "」内にあります。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
+            }
+            await Task.Delay(1000);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\permissions.json", @cfgDATA.location + @"\permissions.json", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\server.properties", @cfgDATA.location + @"\server.properties", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\allowlist.json", @cfgDATA.location + @"\allowlist.json", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\whitelist.json", @cfgDATA.location + @"\whitelist.json", true);
+            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\worlds", @cfgDATA.location + @"\worlds");
+            File.Delete(@"tmp\Minecraft_BedrockServer.zip");
+            MessageBox.Show("アップデートが完了しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        private void startServer(object sender, RoutedEventArgs e)
+        {
+            ConfigData cfgDATA = null;
+            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+            }
+            var Minecraft = new Process
+            {
+                StartInfo = new ProcessStartInfo(@cfgDATA.location + @"\bedrock_server.exe")
+                {
+                    UseShellExecute = true,
+                    RedirectStandardOutput = false,
+                    CreateNoWindow = false
+                }
+            };
+            Minecraft.Start();
+        }
+
+
+
+        private void saveConfig(object sender, RoutedEventArgs e)
+        {
+            ConfigData cfgDATA_bf = null;
+            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                cfgDATA_bf = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+            }
+            ConfigData cfgDATA = new ConfigData
+            {
+                name = server_name.Text,
+                location = serverLocation.Text,
+                seed = @cfgDATA_bf.seed
+            };
+            string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
+            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
+
+
+
+            changeLog = 0;
+            MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
         }
     }
 }
