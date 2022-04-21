@@ -16,6 +16,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using Newtonsoft.Json;
+using System.Net;
+using System.Net.Http;
+using System.Diagnostics;
 
 namespace bedrock_server_manager
 {
@@ -26,12 +29,25 @@ namespace bedrock_server_manager
     
     public partial class MainWindow : Window
     {
-        // https://www.minecraft.net/en-us/download/server/bedrock
-        // https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip
+        // ダウンロードページ: https://www.minecraft.net/en-us/download/server/bedrock
+        // 最新バージョン: https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip
+        // サーバーバージョン取得: behavior_packs/vanilla_XXXXX
+
+        // MinecraftBedrockサーバーのダウンロード用ページリンク変数
+        public string belink = "https://www.minecraft.net/en-us/download/server/bedrock";
+
+
+
+        public int changeLog = 0;
+        public string downloadLink = "";
+        public string currentVersion = "";
+        public string latestVersion = "";
+
         class ConfigData
         {
             public string name { get; set; }
             public string location { get; set; }
+            public string seed { get; set; }
         }
 
         private void textBoxPrice_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -53,15 +69,13 @@ namespace bedrock_server_manager
         public MainWindow()
         {
             InitializeComponent();
+            Console.WriteLine("Components initialized.");
             if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
             {
-                ConfigData cfgDATA = new ConfigData
-                {
-                    name = "Dedicated Server",
-                    location = @"C:\",
-                };
-                string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
-                File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
+                Console.WriteLine("FirstSession dialog show!");
+                firstSession firstSession = new firstSession();
+                firstSession.ShowDialog();
+                Console.WriteLine("FirstSession dialog closed.");
             }
             try
             {
@@ -71,17 +85,51 @@ namespace bedrock_server_manager
                     JsonSerializer serializer = new JsonSerializer();
                     cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
                 }
-                サーバー名.Content = cfgDATA.name;
+                サーバー名.Content = "サーバー名：" + cfgDATA.name;
                 serverLocation.Text = cfgDATA.location;
-                // Pythonでバージョン系を取得するプログラム
+                Console.WriteLine("Settings are loaded.");
+
+                Console.WriteLine("Start task...");
+                var dlLink = new Process
+                {
+                    StartInfo = new ProcessStartInfo("python/BE_Server_Manager_MAIN.exe")
+                    {
+                        Arguments = "-getLatest",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
+                dlLink.Start();
+                StreamReader dl = dlLink.StandardOutput;
+                downloadLink = dl.ReadLine().Replace("\r", "").Replace("\n", "");
+                dlLink.WaitForExit();
+                dlLink.Close();
+                Console.WriteLine("Connection all rights.\n" + downloadLink);
+
+                Match match1 = Regex.Match(downloadLink, @"https://minecraft.azureedge.net/bin-win/bedrock-server-[0-9.-]+.zip");
+                downloadLink = match1.Value;
+                latestVersion = downloadLink.Replace("https://minecraft.azureedge.net/bin-win/bedrock-server-", "").Replace(".zip", "");
+                Console.WriteLine(latestVersion);
+                string[] lb = new string[latestVersion.Split('.').Length - 1];
+                Array.Copy(latestVersion.Split('.'), 0, lb, 0, latestVersion.Split('.').Length - 1);
+                string lv = string.Join(".", lb);
+                Console.WriteLine(lv);
                 if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
                 {
-                    ;
+                    if (Directory.Exists(@cfgDATA.location + @"\behavior_packs\vanilla_" + lv))
+                    {
+                        Console.WriteLine("最新バージョンです。");
+                    }
+                    else
+                    {
+                        MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
             }
             catch (Exception err)
             {
-                MessageBox.Show("設定ファイル読み込み時にエラーが発生しました。\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("起動中にエラーが発生しました。\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
             
@@ -106,6 +154,29 @@ namespace bedrock_server_manager
                     return;
                 }
                 serverLocation.Text = cofd.FileName;
+            }
+        }
+
+        private void updateContent(object sender, TextChangedEventArgs e)
+        {
+            changeLog = 1;
+        }
+
+        private void selectionChange(object sender, SelectionChangedEventArgs e)
+        {
+            changeLog = 1;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (changeLog != 0)
+            {
+                MessageBoxResult ans = MessageBox.Show("保存していない項目があるようです。\n保存せずに終了してもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
+                Console.WriteLine(ans);
+                if (ans != MessageBoxResult.OK)
+                {
+                    e.Cancel = true;
+                }
             }
         }
     }
