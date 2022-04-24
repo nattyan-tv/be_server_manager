@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 
 namespace bedrock_server_manager
@@ -80,6 +81,133 @@ namespace bedrock_server_manager
 
         }
 
+        public void LoadServerSetting(string fileLocation)
+        {
+            /// Load setting file and place.
+            
+            StreamReader file = new StreamReader(@fileLocation);
+            string[] content = file.ReadToEnd().Replace("\r\n","\n").Split(new[] {'\n','\r'});
+            file.Close();
+            foreach(string item in content)
+            {
+
+                if (item.IndexOf("=") != -1 && !item.StartsWith("#"))
+                {
+                    string settingItem = item.Split('=')[0].Replace("-", "_").Replace(".", "_");
+                    string settingValue = item.Split('=')[1];
+
+                    TextBox tb = FindName("config_" + settingItem) as TextBox;
+                    ComboBox cb = FindName("config_" + settingItem) as ComboBox;
+                    if (tb != null)
+                    {
+                        Console.WriteLine("TB: " + item);
+                        tb.Text = settingValue;
+                    }
+                    else if (cb != null)
+                    {
+                        Console.WriteLine("CB: " + item);
+                        cb.Text = settingValue;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unsupported: " + item);
+                    }
+
+                }
+            }
+        }
+
+
+
+        public void SaveServerSetting(string fileLocation)
+        {
+            /// Save file
+            
+            var items = new List<string>(){
+                "server-name",
+                "gamemode",
+                "view-distance",
+                "pvp",
+                "difficulty",
+                "max-players",
+                "server-port",
+                "server-portv6",
+                "level-seed",
+                "player-idle-timeout",
+                "max-threads",
+                "tick-distance",
+                "allow-cheats",
+                "white-list",
+                "online-mode",
+                "content-log-file-enabled",
+                "default-player-permission-level",
+                "texturepack-required",
+                "compression-threshold",
+                "correct-player-movement",
+                "server-authoritative-movement",
+                "player-movement-distance-threshold",
+                "player-movement-duration-threshold-in-ms",
+                "player-movement-score-threshold",
+                "level-name"
+            };
+            if (!File.Exists(fileLocation))
+            {
+                StreamWriter bfile = new StreamWriter(@fileLocation, false);
+                bfile.WriteLine("");
+                bfile.Close();
+            }
+            StreamReader rfile = new StreamReader(@fileLocation);
+            string all_content = rfile.ReadToEnd();
+            string[] content = rfile.ReadToEnd().Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
+            rfile.Close();
+            foreach (string item in content)
+            {
+
+                if (item.IndexOf("=") != -1 && !item.StartsWith("#") && items.Contains(item))
+                {
+                    string settingItem = item.Split('=')[0].Replace("-", "_").Replace(".", "_");
+
+                    TextBox tb = FindName("config_" + settingItem) as TextBox;
+                    ComboBox cb = FindName("config_" + settingItem) as ComboBox;
+                    if (tb != null)
+                    {
+                        Console.WriteLine("TB: " + item);
+                        all_content.Replace(item, settingItem + "=" + tb.Text);
+                    }
+                    else if (cb != null)
+                    {
+                        Console.WriteLine("CB: " + item);
+                        all_content.Replace(item, settingItem + "=" + cb.Text);
+                    }
+                    items.Remove(settingItem);
+                }
+            }
+            if (items.Count() != 0)
+            {
+                foreach (string item in items)
+                {
+                    string settingItem = item.Split('=')[0].Replace("-", "_").Replace(".", "_");
+
+                    TextBox tb = FindName("config_" + settingItem) as TextBox;
+                    ComboBox cb = FindName("config_" + settingItem) as ComboBox;
+                    if (tb != null)
+                    {
+                        Console.WriteLine("TB: " + item);
+                        all_content += "\n" + settingItem + "=" + tb.Text;
+                    }
+                    else if (cb != null)
+                    {
+                        Console.WriteLine("CB: " + item);
+                        all_content += "\n" + settingItem + "=" + cb.Text;
+                    }
+                }
+            }
+
+            StreamWriter wfile = new StreamWriter(@fileLocation, false);
+            wfile.WriteLine(all_content);
+            wfile.Close();
+        }
+
         public static void DirectoryCopy(string sourcePath, string destinationPath)
         {
             DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
@@ -109,7 +237,12 @@ namespace bedrock_server_manager
 
         public MainWindow()
         {
+
             InitializeComponent();
+            if (config_max_players.GetType() == typeof(TextBox))
+            {
+                Console.WriteLine("TRUE");
+            }
             Console.WriteLine("Components initialized.");
             if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
             {
@@ -126,8 +259,6 @@ namespace bedrock_server_manager
                     JsonSerializer serializer = new JsonSerializer();
                     cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
                 }
-                サーバー名.Content = "サーバー名：" + cfgDATA.name;
-                serverLocation.Text = cfgDATA.location;
                 Console.WriteLine("Settings are loaded.");
 
                 Console.WriteLine("Start task...");
@@ -158,6 +289,12 @@ namespace bedrock_server_manager
                 Console.WriteLine(lv);
                 if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
                 {
+                    LoadServerSetting(@cfgDATA.location + @"\server.properties");
+
+                    サーバー名.Content = "サーバー名：" + cfgDATA.name;
+                    config_server_name.Text = cfgDATA.name;
+                    serverLocation.Text = cfgDATA.location;
+                    config_level_seed.Text = cfgDATA.seed;
                     if (Directory.Exists(@cfgDATA.location + @"\behavior_packs\vanilla_" + lv))
                     {
                         Console.WriteLine("最新バージョンです。");
@@ -167,10 +304,11 @@ namespace bedrock_server_manager
                         MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
+                changeLog = 0;
             }
             catch (Exception err)
             {
-                MessageBox.Show("起動中にエラーが発生しました。\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("起動中にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
             
@@ -336,18 +474,21 @@ namespace bedrock_server_manager
             }
             ConfigData cfgDATA = new ConfigData
             {
-                name = server_name.Text,
+                name = config_server_name.Text,
                 location = serverLocation.Text,
                 seed = @cfgDATA_bf.seed
             };
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
 
+            SaveServerSetting(serverLocation.Text + @"\server.properties");
 
+            
 
             changeLog = 0;
             MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
+
     }
 }
