@@ -8,6 +8,8 @@ def cls():
 
 def main(address: str, port: int):
     while True:
+        # get status
+        # get time
         print(f"""\
 Minecraft Server {address}:{port}""")
 
