@@ -12,8 +12,8 @@
             <Menu VerticalAlignment="Top" Height="18">
 
                 <MenuItem Header="ファイル">
-                    <MenuItem Header="設定を保存する"/>
-                    <MenuItem Header="終了"/>
+                    <MenuItem Header="設定を保存する" Click="saveConfig"/>
+                    <MenuItem Header="終了" Click="Window_Closing" />
                 </MenuItem>
 
             </Menu>

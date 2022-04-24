@@ -21,6 +21,20 @@ using System.Net;
 using System.Net.Http;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
+using MineStatLib;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
+using System.ServiceModel;
+using System.ServiceModel.Web;
+
+
+/// 
+/// BE Server Manager
+/// Powered by: nattyan-tv
+/// 
+/// The C# Based Minecraft: Bedrock Edition Server Manager.
+/// (And Python using.)
+///
 
 
 namespace bedrock_server_manager
@@ -32,11 +46,11 @@ namespace bedrock_server_manager
     
     public partial class MainWindow : Window
     {
-        // ダウンロードページ: https://www.minecraft.net/en-us/download/server/bedrock
-        // 最新バージョン: https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip
-        // サーバーバージョン取得: behavior_packs/vanilla_XXXXX
-
-        // MinecraftBedrockサーバーのダウンロード用ページリンク変数
+        /// ダウンロードページ: https://www.minecraft.net/en-us/download/server/bedrock
+        /// 最新バージョン: https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip
+        /// サーバーバージョン取得: behavior_packs/vanilla_XXXXX
+        ///
+        /// MinecraftBedrockサーバーのダウンロード用ページリンク変数
         public string belink = "https://www.minecraft.net/en-us/download/server/bedrock";
 
 
@@ -52,6 +66,7 @@ namespace bedrock_server_manager
             public string location { get; set; }
             public string seed { get; set; }
         }
+
 
         private void textBoxPrice_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
@@ -345,6 +360,11 @@ namespace bedrock_server_manager
             }
         }
 
+        private void Window_Closing(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
         async private void updateServer(object sender, RoutedEventArgs e)
         {
             if (changeLog != 0)
@@ -488,6 +508,7 @@ namespace bedrock_server_manager
             MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
+
 
     }
 }
