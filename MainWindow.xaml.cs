@@ -213,10 +213,7 @@ namespace bedrock_server_manager
             DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
             DirectoryInfo destinationDirectory = new DirectoryInfo(destinationPath);
 
-            if (sourceDirectory.Exists == false)
-            {
-                return;
-            }
+            if (sourceDirectory.Exists == false){ return; }
 
             if (destinationDirectory.Exists == false)
             {
@@ -239,10 +236,6 @@ namespace bedrock_server_manager
         {
 
             InitializeComponent();
-            if (config_max_players.GetType() == typeof(TextBox))
-            {
-                Console.WriteLine("TRUE");
-            }
             Console.WriteLine("Components initialized.");
             if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
             {
@@ -259,7 +252,10 @@ namespace bedrock_server_manager
                     JsonSerializer serializer = new JsonSerializer();
                     cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
                 }
+
                 Console.WriteLine("Settings are loaded.");
+
+                if (!Directory.Exists(@cfgDATA.location)){ Directory.CreateDirectory(@cfgDATA.location); }
 
                 Console.WriteLine("Start task...");
                 var dlLink = new Process
@@ -287,22 +283,18 @@ namespace bedrock_server_manager
                 Array.Copy(latestVersion.Split('.'), 0, lb, 0, latestVersion.Split('.').Length - 1);
                 string lv = string.Join(".", lb);
                 Console.WriteLine(lv);
+                最新バージョン.Content = "配信中バージョン：" + lv;
                 if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
                 {
                     LoadServerSetting(@cfgDATA.location + @"\server.properties");
+                    launchButton.IsEnabled = true;
 
                     サーバー名.Content = "サーバー名：" + cfgDATA.name;
                     config_server_name.Text = cfgDATA.name;
                     serverLocation.Text = cfgDATA.location;
                     config_level_seed.Text = cfgDATA.seed;
-                    if (Directory.Exists(@cfgDATA.location + @"\behavior_packs\vanilla_" + lv))
-                    {
-                        Console.WriteLine("最新バージョンです。");
-                    }
-                    else
-                    {
-                        MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    if (Directory.Exists(@cfgDATA.location + @"\behavior_packs\vanilla_" + lv)){ Console.WriteLine("最新バージョンです。"); }
+                    else{ MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
                 }
                 changeLog = 0;
             }
@@ -328,10 +320,7 @@ namespace bedrock_server_manager
                 IsFolderPicker = true,
             })
             {
-                if (cofd.ShowDialog() != CommonFileDialogResult.Ok)
-                {
-                    return;
-                }
+                if (cofd.ShowDialog() != CommonFileDialogResult.Ok){ return; }
                 serverLocation.Text = cofd.FileName;
             }
         }
@@ -352,15 +341,18 @@ namespace bedrock_server_manager
             {
                 MessageBoxResult ans = MessageBox.Show("保存していない項目があるようです。\n保存せずに終了してもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
                 Console.WriteLine(ans);
-                if (ans != MessageBoxResult.OK)
-                {
-                    e.Cancel = true;
-                }
+                if (ans != MessageBoxResult.OK){ e.Cancel = true; }
             }
         }
 
         async private void updateServer(object sender, RoutedEventArgs e)
         {
+            if (changeLog != 0)
+            {
+                MessageBoxResult ans_c = MessageBox.Show("保存していない項目があるようです。\n保存せずに続行してもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
+                Console.WriteLine(ans_c);
+                if (ans_c != MessageBoxResult.OK) { return; }
+            }
             MessageBoxResult ans = MessageBox.Show("アップデートを実行してもよろしいですか？\nアップデート作業中はBE Server Managerは操作できなくなります。\nサーバーが実行されている場合は停止します。", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
             Console.WriteLine(ans);
             if (ans != MessageBoxResult.OK)
@@ -375,10 +367,7 @@ namespace bedrock_server_manager
                 p.CloseMainWindow();
 
                 p.WaitForExit(10000);
-                if (p.HasExited)
-                {
-                    Console.WriteLine("Exit!!!");
-                }
+                if (p.HasExited) { Console.WriteLine("Exit!!!"); }
                 else
                 {
                     MessageBox.Show("サーバープログラムが終了しませんでした。\n手動で停止しなおすか、しばらく待った後に再度やり直してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -444,6 +433,12 @@ namespace bedrock_server_manager
 
         private void startServer(object sender, RoutedEventArgs e)
         {
+            if (changeLog != 0)
+            {
+                MessageBoxResult ans_c = MessageBox.Show("保存していない項目があるようです。\n現在の設定を適応するには保存する必要があります。\n保存せずに続行しますか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
+                Console.WriteLine(ans_c);
+                if (ans_c != MessageBoxResult.OK) { return; }
+            }
             ConfigData cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
@@ -478,12 +473,16 @@ namespace bedrock_server_manager
                 location = serverLocation.Text,
                 seed = @cfgDATA_bf.seed
             };
+            サーバー名.Content = "サーバー名：" + config_server_name.Text;
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
 
             SaveServerSetting(serverLocation.Text + @"\server.properties");
 
-            
+            if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
+            {
+                launchButton.IsEnabled = true;
+            }
 
             changeLog = 0;
             MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
