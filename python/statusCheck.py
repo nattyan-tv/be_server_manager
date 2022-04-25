@@ -1,20 +1,46 @@
-import os, sys, json, asyncio, time
-import mcstatus
+import os, sys, json, asyncio, datetime
+from mcstatus import BedrockStatus as mcb
 
 # Check Minecraft server status and show it.
 
 def cls():
     os.system("cls")
 
-def main(address: str, port: int):
+async def main():
+    address, port = sys.argv[1], sys.argv[2]
     while True:
+        server = mcb.lookup(f"{address}:{port}")
+        status = None
+        error = None
+        try:
+            status = server.status()
+        except BaseException as err:
+            error = err
+        nowtime = datetime.datetime.now()
         # get status
         # get time
-        print(f"""\
-Minecraft Server {address}:{port}""")
+        if status != None:
+            print(f"""\
+SERVER {address}:{port}
+{nowtime.year}/{nowtime.month}/{nowtime.day} {nowtime.hour}:{nowtime.minute}:{nowtime.second}
+
+Player:{status.players_online}/{status.players_max}
+Ping:{int(status.latency*1000)}ms
+Gamemode:{status.gamemode}
+Version:{status.version}
+
+{status.motd}
+""")
+        else:
+            print(f"""\
+SERVER {address}:{port}
+{nowtime.year}/{nowtime.month}/{nowtime.day} {nowtime.hour}:{nowtime.minute}:{nowtime.second}
+
+Offline.
+""")
 
     return
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]))
+    asyncio.run(main)
