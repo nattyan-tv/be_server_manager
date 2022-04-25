@@ -31,6 +31,9 @@ namespace bedrock_server_manager
             public string name { get; set; }
             public string location { get; set; }
             public string seed { get; set; }
+            public string backup { get; set; }
+            public bool autoupdate { get; set; }
+            public bool autobackup { get; set; }
         }
         public firstSession()
         {
@@ -62,7 +65,10 @@ namespace bedrock_server_manager
             {
                 name = server_name.Text,
                 location = serverLocation.Text,
-                seed = server_seed.Text
+                seed = server_seed.Text,
+                backup = "",
+                autoupdate = false,
+                autobackup = false
             };
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);

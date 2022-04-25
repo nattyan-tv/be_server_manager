@@ -65,14 +65,61 @@ namespace bedrock_server_manager
             public string name { get; set; }
             public string location { get; set; }
             public string seed { get; set; }
+            public string backup { get; set; }
+            public bool autoupdate { get; set; }
+            public bool autobackup { get; set; }
         }
 
-        private void BackupServer(){
-            FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\permissions.json", true);
-            FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\server.properties", true);
-            FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\allowlist.json", true);
-            FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\whitelist.json", true);
-            DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\worlds");
+        private void BackupServerForeground(){
+            try
+            {
+                ConfigData cfgDATA = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                }
+                if(!Directory.Exists(@cfgDATA.backup))
+                {
+                    Directory.CreateDirectory(@cfgDATA.backup);
+                }
+                DateTime dt = DateTime.Now;
+                DirectoryCopy(@cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                MessageBox.Show("バックアップが完了しました。\n\n・場所\n" + @cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"), "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show("バックアップ中にエラーが発生しました。\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+            }
+            return;
+            
+        }
+
+        private void BackupServerBackground(){
+            try
+            {
+                ConfigData cfgDATA = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                }
+                if(!Directory.Exists(@cfgDATA.backup))
+                {
+                    Directory.CreateDirectory(@cfgDATA.backup);
+                }
+                DateTime dt = DateTime.Now;
+                DirectoryCopy(@cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                Console.WriteLine("バックアップが完了しました。\n\n・場所\n" + @cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                return;
+            }
+            catch(Exception err)
+            {
+                Console.WriteLine("バックアップ中にエラーが発生しました。\n" + err);
+            }
+            return;
+            
         }
 
 
@@ -254,6 +301,9 @@ namespace bedrock_server_manager
                 DirectoryCopy(directoryInfo.FullName, destinationDirectory.FullName + @"\" + directoryInfo.Name);
             }
         }
+
+        /// MainWindow Program
+        /// This program (below this comment) will execution when Program launced.
 
         public MainWindow()
         {
