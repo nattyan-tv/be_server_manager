@@ -18,7 +18,8 @@ async def main():
             error = err
         nowtime = datetime.datetime.now()
         # get status
-        # get time
+        # get time_
+        cls()
         if status != None:
             print(f"""\
 SERVER {address}:{port}
@@ -38,8 +39,7 @@ SERVER {address}:{port}
 
 Offline.
 """)
-
-    return
+        await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
