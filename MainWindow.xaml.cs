@@ -60,14 +60,18 @@ namespace bedrock_server_manager
         public string currentVersion = "";
         public string latestVersion = "";
 
-        class ConfigData
+        public class ConfigData
         {
             public string name { get; set; }
             public string location { get; set; }
             public string seed { get; set; }
+            public string update { get; set; }
             public string backup { get; set; }
+            public string backupTime { get; set; }
             public bool autoupdate { get; set; }
             public bool autobackup { get; set; }
+            public string botToken { get; set; }
+            public string botPrefix { get; set; }
         }
 
         private void BackupServerForeground(){
@@ -85,7 +89,7 @@ namespace bedrock_server_manager
                 }
                 DateTime dt = DateTime.Now;
                 DirectoryCopy(@cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
-                MessageBox.Show("バックアップが完了しました。\n\n・場所\n" + @cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"), "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("バックアップが完了しました。\n\n・場所\n" + @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"), "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             catch(Exception err)
@@ -149,6 +153,30 @@ namespace bedrock_server_manager
 
             File.Copy(sourcePath, destinationPath, rewrite);
 
+        }
+
+        public static void DirectoryCopy(string sourcePath, string destinationPath)
+        {
+            DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
+            DirectoryInfo destinationDirectory = new DirectoryInfo(destinationPath);
+
+            if (sourceDirectory.Exists == false) { return; }
+
+            if (destinationDirectory.Exists == false)
+            {
+                destinationDirectory.Create();
+                destinationDirectory.Attributes = sourceDirectory.Attributes;
+            }
+
+            foreach (FileInfo fileInfo in sourceDirectory.GetFiles())
+            {
+                fileInfo.CopyTo(destinationDirectory.FullName + @"\" + fileInfo.Name, true);
+            }
+
+            foreach (System.IO.DirectoryInfo directoryInfo in sourceDirectory.GetDirectories())
+            {
+                DirectoryCopy(directoryInfo.FullName, destinationDirectory.FullName + @"\" + directoryInfo.Name);
+            }
         }
 
         public void LoadServerSetting(string fileLocation)
@@ -278,29 +306,7 @@ namespace bedrock_server_manager
             wfile.Close();
         }
 
-        public static void DirectoryCopy(string sourcePath, string destinationPath)
-        {
-            DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
-            DirectoryInfo destinationDirectory = new DirectoryInfo(destinationPath);
 
-            if (sourceDirectory.Exists == false){ return; }
-
-            if (destinationDirectory.Exists == false)
-            {
-                destinationDirectory.Create();
-                destinationDirectory.Attributes = sourceDirectory.Attributes;
-            }
-
-            foreach (FileInfo fileInfo in sourceDirectory.GetFiles())
-            {
-                fileInfo.CopyTo(destinationDirectory.FullName + @"\" + fileInfo.Name, true);
-            }
-
-            foreach (System.IO.DirectoryInfo directoryInfo in sourceDirectory.GetDirectories())
-            {
-                DirectoryCopy(directoryInfo.FullName, destinationDirectory.FullName + @"\" + directoryInfo.Name);
-            }
-        }
 
         /// MainWindow Program
         /// This program (below this comment) will execution when Program launced.
@@ -567,6 +573,16 @@ namespace bedrock_server_manager
             return;
         }
 
+        private void openConfigBackup(object sender, RoutedEventArgs e)
+        {
+            settingBackup window = new settingBackup();
+            window.ShowDialog();
+        }
 
+        private void openConfigUpdate(object sender, RoutedEventArgs e)
+        {
+            settingUpdate window = new settingUpdate();
+            window.ShowDialog();
+        }
     }
 }

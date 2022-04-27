@@ -1,0 +1,32 @@
+﻿<Window x:Class="bedrock_server_manager.settingBackup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:bedrock_server_manager"
+        mc:Ignorable="d"
+        Title="バックアップの設定" Height="416" Width="800" Closing="Window_Closing" >
+    <Grid Margin="0,0,0,0">
+        <Label FontSize="18" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">バックアップの設定</Label>
+        <Grid Margin="10,49,10,0" Height="127" VerticalAlignment="Top">
+            <Label FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0">すぐにバックアップする</Label>
+            <Label Content="バックアップ場所：" HorizontalAlignment="Left" Margin="10,49,0,0" FontSize="16" FontFamily="Yu Gothic UI" Height="31" VerticalAlignment="Top"/>
+            <TextBox x:Name="backupNOWLocation" IsReadOnly="True" Margin="144,0,89,0" TextWrapping="Wrap" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="/" Height="31" VerticalAlignment="Center"/>
+            <Button Content="参照" Margin="0,0,10,0" FontSize="16" Click="changeBackupNOW" Height="31" VerticalAlignment="Center" HorizontalAlignment="Right" Width="74"/>
+            <Button Content="バックアップする" Margin="0,85,10,0" FontSize="16" Click="backupNOW" ToolTip="すぐにバックアップします。" Height="31" VerticalAlignment="Top" HorizontalAlignment="Right" Width="212"/>
+        </Grid>
+        <Grid Margin="10,181,10,0" Height="150" VerticalAlignment="Top">
+            <Label FontSize="18" HorizontalAlignment="Left" Margin="10,10,0,0" Height="34" VerticalAlignment="Top">自動バックアップの設定</Label>
+            <CheckBox x:Name="AutoBackup" Content="自動でバックアップを行う" HorizontalAlignment="Left" Margin="10,49,0,0" FontSize="16" Click="AutoBackup_Clicked" Height="20" VerticalAlignment="Top"/>
+            <Label Content="バックアップ場所：" HorizontalAlignment="Left" Margin="10,74,0,0" FontSize="16" FontFamily="Yu Gothic UI" Height="31" VerticalAlignment="Top"/>
+            <TextBox x:Name="serverBackup" IsReadOnly="True" Margin="144,74,89,45" TextWrapping="Wrap" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="/" TextChanged="serverBackup_TextChanged"/>
+            <Button x:Name="backupButton" Content="参照" Margin="0,74,10,0" FontSize="16" Click="changeBackupLocation" IsEnabled="False" HorizontalAlignment="Right" Width="74" Height="31" VerticalAlignment="Top"/>
+            <Label Content="バックアップ間隔（分）：" HorizontalAlignment="Left" FontSize="16" FontFamily="Yu Gothic UI" Margin="10,110,0,0" Height="31" VerticalAlignment="Top"/>
+            <TextBox x:Name="backupTime" TextWrapping="Wrap" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="30" IsEnabled="False"  InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxTime_PreviewTextInput" CommandManager.PreviewExecuted="textBoxTime_PreviewExecuted" Margin="192,110,10,9"/>
+        </Grid>
+        <Button x:Name="backupSave" Content="保存して閉じる" Margin="0,0,10,10" FontSize="14" Click="saveSettings" Height="31" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="212"/>
+
+
+
+    </Grid>
+</Window>

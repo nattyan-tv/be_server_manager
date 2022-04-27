@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace bedrock_server_manager
 {
@@ -26,15 +27,33 @@ namespace bedrock_server_manager
     public partial class firstSession : Window
     {
         public bool setted = false;
-        class ConfigData
+
+        public class ConfigData
         {
             public string name { get; set; }
             public string location { get; set; }
             public string seed { get; set; }
+            public string update { get; set; }
             public string backup { get; set; }
+            public string backupTime { get; set; }
             public bool autoupdate { get; set; }
             public bool autobackup { get; set; }
+            public string botToken { get; set; }
+            public string botPrefix { get; set; }
         }
+
+        private void textBoxTime_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !new Regex("[0-9:]").IsMatch(e.Text);
+        }
+        private void textBoxTime_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (e.Command == ApplicationCommands.Paste)
+            {
+                e.Handled = true;
+            }
+        }
+
         public firstSession()
         {
             InitializeComponent();
@@ -61,14 +80,32 @@ namespace bedrock_server_manager
 
         private void saveAndStart(object sender, RoutedEventArgs e)
         {
+            DateTime dt;
+
+            if (updateTime.Text.Length == 4)
+            {
+                updateTime.Text = "0" + updateTime.Text;
+            }
+
+            if (!DateTime.TryParseExact(updateTime.Text, "HH:mm", null, DateTimeStyles.AssumeLocal, out dt))
+            {
+                MessageBox.Show("バックアップの時間指定が異常です。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            backupTime.Text = backupTime.Text.Replace(":", "");
+
             ConfigData cfgDATA = new ConfigData
             {
                 name = server_name.Text,
                 location = serverLocation.Text,
                 seed = server_seed.Text,
-                backup = "",
-                autoupdate = false,
-                autobackup = false
+                update = updateTime.Text,
+                backup = serverBackup.Text,
+                backupTime = backupTime.Text,
+                autoupdate = (bool)AutoUpdate.IsChecked,
+                autobackup = (bool)AutoBackup.IsChecked,
+                botToken = "",
+                botPrefix = ""
             };
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
@@ -88,6 +125,35 @@ namespace bedrock_server_manager
                 Environment.Exit(0);
             }
             
+        }
+
+        private void changeBackupLocation(object sender, RoutedEventArgs e)
+        {
+            using (var cofd = new CommonOpenFileDialog()
+            {
+                Title = "バックアップデータを保存する場所を選択してください。",
+                InitialDirectory = @"C:",
+                RestoreDirectory = true,
+                IsFolderPicker = true,
+            })
+            {
+                if (cofd.ShowDialog() != CommonFileDialogResult.Ok)
+                {
+                    return;
+                }
+                serverBackup.Text = cofd.FileName;
+            }
+        }
+
+        private void AutoUpdate_Clicked(object sender, RoutedEventArgs e)
+        {
+            updateTime.IsEnabled = !updateTime.IsEnabled;
+        }
+
+        private void AutoBackup_Clicked(object sender, RoutedEventArgs e)
+        {
+            backupButton.IsEnabled = !backupButton.IsEnabled;
+            backupTime.IsEnabled = !backupTime.IsEnabled;
         }
     }
 }

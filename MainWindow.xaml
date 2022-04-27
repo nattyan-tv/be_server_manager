@@ -16,6 +16,16 @@
                     <MenuItem Header="終了" Click="Window_Closing" />
                 </MenuItem>
 
+                <MenuItem Header="各種設定">
+                    <MenuItem Header="バックアップ設定" Click="openConfigBackup"/>
+                    <MenuItem Header="アップデート設定" Click="openConfigUpdate" />
+                    <MenuItem Header="DiscordBOT設定" />
+                </MenuItem>
+
+                <MenuItem Header="ヘルプ">
+                    <MenuItem Header="BE Server Managerのバージョン情報"/>
+                </MenuItem>
+
             </Menu>
         </Grid>
         <Grid Height="118" VerticalAlignment="Top" Background="#FFF3FFF5" Margin="0,18,0,0">
@@ -42,9 +52,9 @@
                 <Grid Grid.Column="1" Margin="10,10,10,0" Height="40" VerticalAlignment="Top">
                     <Label Content="ゲームモード：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
                     <ComboBox x:Name="config_gamemode" SelectionChanged="selectionChange" Margin="105,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバー内のゲームモードです。">
-                        <ComboBoxItem Content="survival" ToolTip="サバイバルモード\nクラシックなマインクラフトで、死なないように生き延びます。"></ComboBoxItem>
-                        <ComboBoxItem Content="creative" ToolTip="クリエイティブモード\n基本的に死なず、ブロックなどを自由に出すことができます。"></ComboBoxItem>
-                        <ComboBoxItem Content="adventure" ToolTip="アドベンチャーモード\nブロックの破壊/設置などが一切できないモードです。"></ComboBoxItem>
+                        <ComboBoxItem Content="survival" ToolTip="サバイバルモード&#xa;クラシックなマインクラフトで、死なないように生き延びます。"></ComboBoxItem>
+                        <ComboBoxItem Content="creative" ToolTip="クリエイティブモード&#xa;基本的に死なず、ブロックなどを自由に出すことができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="adventure" ToolTip="アドベンチャーモード&#xa;ブロックの破壊/設置などが一切できないモードです。"></ComboBoxItem>
                     </ComboBox>
                 </Grid>
                 <Grid Grid.Column="0" Margin="10,55,10,0" Height="40" VerticalAlignment="Top">
@@ -74,11 +84,11 @@
                 </Grid>
                 <Grid Grid.Column="0" Margin="10,145,10,0" Height="40" VerticalAlignment="Top">
                     <Label Content="IPv4ポート：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
-                    <TextBox x:Name="config_server_port" Margin="100,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="IPv4で接続するためのポートを指定します。\n通常は19132です。" TextChanged="updateContent"></TextBox>
+                    <TextBox x:Name="config_server_port" Margin="100,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="IPv4で接続するためのポートを指定します。&#xa;通常は19132です。" TextChanged="updateContent"></TextBox>
                 </Grid>
                 <Grid Grid.Column="1" Margin="10,145,10,0" Height="40" VerticalAlignment="Top">
                     <Label Content="IPv6ポート：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
-                    <TextBox x:Name="config_server_portv6" Margin="100,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="IPv6で接続するためのポートを指定します。\n通常は19133又は、IPv4ポート+1です。" TextChanged="updateContent"></TextBox>
+                    <TextBox x:Name="config_server_portv6" Margin="100,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="IPv6で接続するためのポートを指定します。&#xa;通常は19133又は、IPv4ポート+1です。" TextChanged="updateContent"></TextBox>
                 </Grid>
                 <Grid Grid.Column="0" Margin="10,190,10,0" Height="40" VerticalAlignment="Top">
                     <Label Content="シード値：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
@@ -124,9 +134,9 @@
                 <Grid Grid.Column="0" Margin="10,370,10,0" Height="40" VerticalAlignment="Top">
                     <Label Content="参加者の権限：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
                     <ComboBox x:Name="config_default_player_permission_level"  SelectionChanged="selectionChange" Margin="129,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="サーバーに参加したユーザーの権限を設定することができます。">
-                        <ComboBoxItem Content="operator" ToolTip="オペレーター\n管理権限を持ったユーザーで、ワールド設定などを変更することができます。"></ComboBoxItem>
-                        <ComboBoxItem Content="member" ToolTip="メンバー\n通常の権限をもったユーザーで、通常のプレイを行うことができます。"></ComboBoxItem>
-                        <ComboBoxItem Content="visitor" ToolTip="ビジター\n一切の権限を持たず、ブロックの破壊/設置や攻撃ができず、観戦のみすることができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="operator" ToolTip="オペレーター&#xa;管理権限を持ったユーザーで、ワールド設定などを変更することができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="member" ToolTip="メンバー&#xa;通常の権限をもったユーザーで、通常のプレイを行うことができます。"></ComboBoxItem>
+                        <ComboBoxItem Content="visitor" ToolTip="ビジター&#xa;一切の権限を持たず、ブロックの破壊/設置や攻撃ができず、観戦のみすることができます。"></ComboBoxItem>
                     </ComboBox>
                 </Grid>
                 <Grid Grid.Column="1" Margin="10,325,10,0" Height="40" VerticalAlignment="Top">
@@ -152,11 +162,11 @@
                 </Grid>
                 <Grid Grid.Column="0" Margin="10,415,9,0" Height="40" VerticalAlignment="Top">
                     <Label Content="ネットワークペイロード：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
-                    <TextBox x:Name="config_compression_threshold" Margin="159,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="未加工のネットワークペイロードの圧縮する最小サイズです。\nデフォルトの1が推奨です。\n(0-65535)" TextChanged="updateContent"></TextBox>
+                    <TextBox x:Name="config_compression_threshold" Margin="159,4,10,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="未加工のネットワークペイロードの圧縮する最小サイズです。&#xa;デフォルトの1が推奨です。&#xa;(0-65535)" TextChanged="updateContent"></TextBox>
                 </Grid>
                 <Grid Grid.Column="1" Margin="11,415,10,0" Height="40" VerticalAlignment="Top">
                     <Label Content="ゲーム内とサーバー内の位置を合わせる：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
-                    <ComboBox x:Name="config_correct_player_movement"  SelectionChanged="selectionChange" Margin="274,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="ゲーム内でのプレイヤーの位置と、サーバー内でのプレイヤーの位置がずれた場合に、それを修正します。\nなお、BEでは試験段階で、無効が推奨です。">
+                    <ComboBox x:Name="config_correct_player_movement"  SelectionChanged="selectionChange" Margin="274,0,10,0" VerticalAlignment="Center" Height="32" VerticalContentAlignment="Center" ToolTip="ゲーム内でのプレイヤーの位置と、サーバー内でのプレイヤーの位置がずれた場合に、それを修正します。&#xa;なお、BEでは試験段階で、無効が推奨です。">
                         <ComboBoxItem Content="true"/>
                         <ComboBoxItem Content="false"/>
                     </ComboBox>
@@ -177,15 +187,15 @@
                 </Grid>
                 <Grid Grid.Column="1" Margin="10,505,9,0" Height="40" VerticalAlignment="Top">
                     <Label Content="サーバーワールド名：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
-                    <TextBox x:Name="config_level_name" Margin="145,4,10,4" VerticalContentAlignment="Center" ToolTip="サーバーのワールドの名前を指定します。\nこの名前でワールドファイルが作成されます。" TextChanged="updateContent"></TextBox>
+                    <TextBox x:Name="config_level_name" Margin="145,4,10,4" VerticalContentAlignment="Center" ToolTip="サーバーのワールドの名前を指定します。&#xa;この名前でワールドファイルが作成されます。" TextChanged="updateContent"></TextBox>
                 </Grid>
 
                 <Grid Grid.Column="0" Grid.ColumnSpan="2" Margin="10,560,9,0" Height="121" VerticalAlignment="Top">
                     <Label Content="MOTDの設定：" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI" Margin="10,10,0,0"/>
-                    <TextBox x:Name="motd" Margin="132,10,10,0" VerticalContentAlignment="Center" ToolTip="MOTDの設定です。\n下部のリンクで詳しく解説されています。" Height="70" VerticalAlignment="Top" TextChanged="updateContent"></TextBox>
+                    <TextBox x:Name="motd" Margin="132,10,10,0" VerticalContentAlignment="Center" ToolTip="MOTDの設定です。&#xa;下部のリンクで詳しく解説されています。" Height="70" VerticalAlignment="Top" TextChanged="updateContent"></TextBox>
                     <Label HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top">
                         <Span>
-                            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://minecraft.tools/en/motd.php">MOTDとは？</Hyperlink> /
+                            <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://mcpoteton.com/mcserver/servericon-motd-setting#:~:text=%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%82%A2%E3%82%A4%E3%82%B3%E3%83%B3%E3%81%A8%E8%AA%AC%E6%98%8E%E6%AC%84,%E7%8A%B6%E6%85%8B%E3%81%AB%E3%81%AA%E3%81%A3%E3%81%A6%E3%81%84%E3%81%BE%E3%81%99%E3%80%82">MOTDとは？</Hyperlink> /
                             <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://minecraft.tools/en/motd.php">MOTDの作成が楽に行えるサイト</Hyperlink>
                         </Span>
                     </Label>
