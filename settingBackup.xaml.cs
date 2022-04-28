@@ -216,7 +216,7 @@ namespace bedrock_server_manager
         {
             if (!setted)
             {
-                MessageBoxResult ans_c = MessageBox.Show("保存していない項目があるようです。\n保存せずに終了してもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
+                MessageBoxResult ans_c = MessageBox.Show("保存していない項目があるようです。\n保存しなくてもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
                 Console.WriteLine(ans_c);
                 if (ans_c != MessageBoxResult.OK) { e.Cancel = true; }
             }

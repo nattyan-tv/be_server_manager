@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:bedrock_server_manager"
         mc:Ignorable="d"
-        Title="アップデートの設定" Height="262" Width="800">
+        Title="アップデートの設定" Height="262" Width="800" Closing="Window_Closing">
     <Grid>
         <Label FontSize="18" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">アップデートの設定</Label>
         <Grid Margin="10,49,10,0" Height="113" VerticalAlignment="Top">
             <Label FontSize="18" Margin="10,10,0,0" Height="34" VerticalAlignment="Top" HorizontalAlignment="Left" Width="173">自動アップデートの設定</Label>
             <CheckBox x:Name="AutoUpdate" Content="自動でアップデートを行う" Margin="10,49,0,0" FontSize="16" Click="AutoBackup_Clicked" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="171"/>
             <Label Content="アップデート確認時間（毎日）：" FontSize="16" FontFamily="Yu Gothic UI" Margin="10,74,548,0" Height="31" VerticalAlignment="Top"/>
-            <TextBox x:Name="updateTime" TextWrapping="Wrap" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="00:00" IsEnabled="False"  InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxTime_PreviewTextInput" CommandManager.PreviewExecuted="textBoxTime_PreviewExecuted" Margin="237,74,10,0" Height="32" VerticalAlignment="Top"/>
+            <TextBox x:Name="updateTime" TextWrapping="Wrap" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="00:00" IsEnabled="False"  InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxTime_PreviewTextInput" CommandManager.PreviewExecuted="textBoxTime_PreviewExecuted" Margin="237,74,10,0" Height="32" VerticalAlignment="Top" TextChanged="updateTime_TextChanged"/>
         </Grid>
         <Button x:Name="backupSave" Content="保存して閉じる" Margin="0,0,10,10" FontSize="14" Click="saveSettings" Height="30" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="212"/>
     </Grid>
