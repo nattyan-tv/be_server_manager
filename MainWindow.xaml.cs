@@ -339,7 +339,7 @@ namespace bedrock_server_manager
                 Console.WriteLine("Start task...");
                 var dlLink = new Process
                 {
-                    StartInfo = new ProcessStartInfo("python/BE_Server_Manager_MAIN.exe")
+                    StartInfo = new ProcessStartInfo("python/getLatestVersion.exe")
                     {
                         Arguments = "-getLatest",
                         UseShellExecute = false,

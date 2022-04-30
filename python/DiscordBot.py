@@ -1,19 +1,115 @@
-import os, sys, json, asyncio, datetime
+import os, sys, json, asyncio, datetime, re
+import subprocess
+import shutil
+import aiohttp
 from mcstatus import MinecraftBedrockServer as mcb
+import psutil
 import requests
 import discord
 from discord.ext import commands
 
+
+#LATEST_URL = "https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip"
+#DOWNLOAD_PAGE = "https://www.minecraft.net/en-us/download/server/bedrock"
+#CHECK_VERSION_PLACE = "behavior_packs/vanilla_XXXXX"
+
+
+def checkLaunching():
+    """Check server is launching"""
+    for p in psutil.process_iter(attrs=('name', 'pid', 'cmdline')):
+        if p.info["name"] == "bedrock_server.exe":
+            return True
+    return False
+
+
+def stopServer():
+    """Stop server"""
+    for p in psutil.process_iter(attrs=('name', 'pid', 'cmdline')):
+        if p.info["name"] == "bedrock_server.exe":
+            p.terminate()
+
+
+def startServer():
+    """Start server"""
+    subprocess.run(DIR + "\\bedrock_server.exe", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+
+def checkExist():
+    """Check bedrock server application exisist"""
+    return os.path.isfile(DIR + "\\bedrock_server.exe")
+
+
+def loadSetting():
+    """Load and place server setting"""
+    with open(DIR + "\\server.properties", "r") as f:
+        for j in [i.strip() for i in f.readlines()]:
+            if j[:1] == "#":
+                continue
+            else:
+                arg = j.split("=",2)
+                serverSetting[arg[0]] = arg[1]
+
+
+def checkLatestVersion():
+    """Check latest version of bedrock server"""
+    try:
+        url = "https://www.minecraft.net/en-us/download/server/bedrock"
+        headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.33 (KHTML, like Gecko) Chrome/90.0.123.212 Safari/537.33"}
+        response = requests.get(url, headers=headers)
+        return re.search(u"https://minecraft.azureedge.net/bin-win/bedrock-server-[0-9.-]+.zip", response.text).group().replace("https://minecraft.azureedge.net/bin-win/bedrock-server-","").replace(".zip","")
+    except BaseException as err:
+        return err
+
+def checkCurrentVersion():
+    """Check current version of bedrock server"""
+    dirs = [j[8:] for j in [i for i in os.listdir(os.path.join(DIR, "\\behavior_packs")) if i[:8] == "vanilla_" and i != "vanilla_gametest"]]
+    if len(dirs) == 0:
+        return None
+    dirs.sort()
+    return dirs[-1]
+
+
+async def updateServer():
+    """Update server"""
+    try:
+        url = f"https://minecraft.azureedge.net/bin-win/bedrock-server-{checkLatestVersion()}.zip"
+        if (isinstance(url, BaseException)):
+            return False
+        
+        async def fetch(session, url):
+            async with session.get(url) as response:
+                return await response.content
+
+        async with aiohttp.ClientSession() as session:
+            UpdateData = await fetch(session, url)
+
+        UpdateData = requests.get(url).content
+        os.makedirs(os.path.join(sys.path[0], "\\tmp"), exist_ok=True)
+        
+        with open(os.path.join(sys.path[0], f"\\tmp\\{url.split('/')[-1]}") ,mode='wb') as f:
+            f.write(UpdateData)
+        shutil.copy(os.path.join(DIR, "\\permissions.json"), os.path.join(sys.path[0], "\\tmp\\permissions.json"))
+        shutil.copy(os.path.join(DIR, "\\server.properties"), os.path.join(sys.path[0], "\\tmp\\server.properties"))
+        shutil.copy(os.path.join(DIR, "\\allowlist.json"), os.path.join(sys.path[0], "\\tmp\\allowlist.json"))
+        shutil.copy(os.path.join(DIR, "\\whitelist.json"), os.path.join(sys.path[0], "\\tmp\\whitelist.json"))
+        shutil.copytree(os.path.join(DIR, "\\worlds"), os.path.join(sys.path[0], "\\tmp\\worlds"))
+        shutil.rmtree(DIR)
+        shutil.unpack_archive(os.path.join(sys.path[0], f"\\tmp\\{url.split('/')[-1]}"), os.path.join(DIR))
+        shutil.copy(os.path.join(sys.path[0], "\\tmp\\permissions.json"), os.path.join(DIR, "\\permissions.json"))
+        shutil.copy(os.path.join(sys.path[0], "\\tmp\\server.properties"), os.path.join(DIR, "\\server.properties"))
+        shutil.copy(os.path.join(sys.path[0], "\\tmp\\allowlist.json"), os.path.join(DIR, "\\allowlist.json"))
+        shutil.copy(os.path.join(sys.path[0], "\\tmp\\whitelist.json"), os.path.join(DIR, "\\whitelist.json"))
+        shutil.copytree(os.path.join(sys.path[0], "\\tmp\\worlds"), os.path.join(DIR, "\\worlds"))
+        shutil.rmtree(os.path.join(sys.path[0], "\\tmp"))
+        return True
+    except BaseException as err:
+        return err
+
+
+
 setting = json.load(open("setting.json"))
 PREFIX, DIR, TOKEN, NAME = setting["botPrefix"], setting["location"], setting["botToken"], setting["name"]
 serverSetting = {}
-with open(DIR + "\\server.properties", "r") as f:
-    for j in [i.strip() for i in f.readlines()]:
-        if j[:1] == "#":
-            continue
-        else:
-            arg = j.split("=",2)
-            serverSetting[arg[0]] = arg[1]
 
 intents = discord.Intents.all()
 intents.typing = False
@@ -25,9 +121,13 @@ address = "localhost"
 ipv4 = serverSetting["server-port"]
 ipv6 = serverSetting["server-portv6"]
 
+
+
 @bot.event
 async def on_ready():
-    print("DiscordBot Launched...")
+    print(f"DiscordBot Launched...\n{bot.user.name}#{bot.user.discriminator}")
+
+
 
 @bot.command()
 async def status(ctx: discord.command.Context):
@@ -39,7 +139,6 @@ async def status(ctx: discord.command.Context):
             status = server.status()
         except BaseException as err:
             error = err
-        nowtime = datetime.datetime.now()
         if status != None:
             await ctx.reply(
                 "Status",
@@ -65,6 +164,9 @@ Version:`{status.version.version}`
                     title=f"{NAME}",
                     description=f"""\
 :ng: Offline
+
+```
+{error}```
 """,
                     color=0x477a1e,
                     inline=False
@@ -72,20 +174,83 @@ Version:`{status.version.version}`
             )
         return
 
+
+
 @bot.command()
 async def start(ctx: discord.command.Context):
+    if checkExist():
+        if checkLaunching():
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"既にサーバーは実行されています。", color=0x00ff00, inline=False))
+        else:
+            startServer()
+            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを開始しました。", color=0x477a1e, inline=False))
+    else:
+        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0x00ff00, inline=False))
     return
+
+
 
 @bot.command()
 async def stop(ctx: discord.command.Context):
+    if checkLaunching():
+        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは実行されていません。", color=0x00ff00, inline=False))
+    else:
+        stopServer()
+        await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを停止しました。", color=0x477a1e, inline=False))
     return
+
+
 
 @bot.command()
 async def restart(ctx: discord.command.Context):
+    if checkExist():
+        if checkLaunching():
+            startServer()
+            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーは実行されていませんでしたが、サーバーを開始しました。", color=0x477a1e, inline=False))
+        else:
+            startServer()
+            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを再起動しました。", color=0x477a1e, inline=False))
+    else:
+        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0x00ff00, inline=False))
     return
+
+
 
 @bot.command()
 async def update(ctx: discord.command.Context):
+    args = ctx.message.content.split(" ")
+    if len(args) == 1:
+        if checkExist():
+            if checkLatestVersion() != checkCurrentVersion():
+                if checkLaunching():
+                    await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーが実行されているためアップデート出来ません。\n強制的にアップデートするには`{PREFIX}update force`と送信してください。", color=0x00ff00, inline=False))
+                else:
+                    updateServer()
+                    await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを更新しました。\nバージョン:`{checkLatestVersion()}`", color=0x477a1e, inline=False))
+            else:
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは最新のバージョンです。\n強制的にアップデートするには`{PREFIX}update force`と送信してください。", color=0x00ff00, inline=False))
+        else:
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0x00ff00, inline=False))
+    elif args[1] == "force":
+        if checkExist():
+            updateServer()
+            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを強制更新しました。\nバージョン:`{checkLatestVersion()}`", color=0x477a1e, inline=False))
+        else:
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0x00ff00, inline=False))
     return
+
+
+
+@bot.comamnd()
+async def whitelist(ctx: discord.command.Context):
+    return
+
+
+
+@bot.command()
+async def backup(ctx: discord.command.Context):
+    return
+
+
 
 bot.run(TOKEN)
