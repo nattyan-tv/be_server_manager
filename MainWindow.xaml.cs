@@ -179,6 +179,51 @@ namespace bedrock_server_manager
             }
         }
 
+        public void CopyToCache(){
+            /// Copy private files to cache.
+            
+            ConfigData cfgDATA = null;
+            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+            }
+
+            if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false){
+                Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\temp");
+            }
+            FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", true);
+            FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", true);
+            FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", true);
+            FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", true);
+            FileCopy(@cfgDATA.location + @"\valid_known_packs.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", true);
+            DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds");
+            DirectoryCopy(@cfgDATA.location + @"\world_templates", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates");
+            DirectoryCopy(@cfgDATA.location + @"\development_behavior_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs");
+            DirectoryCopy(@cfgDATA.location + @"\development_resource_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs");
+            DirectoryCopy(@cfgDATA.location + @"\development_skin_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs");
+        }
+
+        public void CopyFromCache(){
+            /// Copy private files from cache.
+            ConfigData cfgDATA = null;
+            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+            }
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", @cfgDATA.location + @"\permissions.json", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", @cfgDATA.location + @"\server.properties", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", @cfgDATA.location + @"\allowlist.json", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", @cfgDATA.location + @"\whitelist.json", true);
+            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", @cfgDATA.location + @"\valid_known_packs.json", true);
+            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds", @cfgDATA.location + @"\worlds");
+            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates", @cfgDATA.location + @"\world_templates");
+            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs", @cfgDATA.location + @"\development_behavior_packs");
+            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs", @cfgDATA.location + @"\development_resource_packs");
+            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs", @cfgDATA.location + @"\development_skin_packs");
+        }
+
         public void LoadServerSetting(string fileLocation)
         {
             /// Load setting file and place.
