@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -182,6 +183,15 @@ namespace bedrock_server_manager
             }
         }
 
+        public async static void BackUpThread(string base_location, string backup_location, string time)
+        {
+            await Task.Run(() =>
+            {
+                DirectoryCopy(@base_location, @backup_location + @"\" + @time);
+            });
+
+        }
+
         private void backupNOW(object sender, RoutedEventArgs e)
         {
             if (backupNOWLocation.Text == "/")
@@ -198,7 +208,7 @@ namespace bedrock_server_manager
             DateTime dt = DateTime.Now;
             try
             {
-                DirectoryCopy(@cfgDATA.location, @backupNOWLocation.Text + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                BackUpThread(@cfgDATA.location, @backupNOWLocation.Text, @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
                 MessageBox.Show("バックアップに完了しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

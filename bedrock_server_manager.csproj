@@ -76,14 +76,8 @@
     <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\WindowsAPICodePack-Shell.1.1.1\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
-    <Reference Include="MineStat, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MineStat.2.1.0\lib\net46\MineStat.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Python.Runtime, Version=2.5.2.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>packages\pythonnet_netstandard_py38_win.2.5.2\lib\netstandard2.0\Python.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -140,6 +134,9 @@
     <Compile Include="settingBackup.xaml.cs">
       <DependentUpon>settingBackup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="settingDiscord.xaml.cs">
+      <DependentUpon>settingDiscord.xaml</DependentUpon>
+    </Compile>
     <Compile Include="settingUpdate.xaml.cs">
       <DependentUpon>settingUpdate.xaml</DependentUpon>
     </Compile>
@@ -163,6 +160,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="settingBackup.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="settingDiscord.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

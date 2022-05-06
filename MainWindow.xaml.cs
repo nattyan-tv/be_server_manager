@@ -21,12 +21,11 @@ using System.Net;
 using System.Net.Http;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
-using MineStatLib;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.ServiceModel;
 using System.ServiceModel.Web;
-
+using System.Threading;
 
 /// 
 /// BE Server Manager
@@ -53,7 +52,7 @@ namespace bedrock_server_manager
         /// MinecraftBedrockサーバーのダウンロード用ページリンク変数
         public string belink = "https://www.minecraft.net/en-us/download/server/bedrock";
 
-
+        public string ApplicationVersion = @"v0.9.1";
 
         public int changeLog = 0;
         public string downloadLink = "";
@@ -179,49 +178,60 @@ namespace bedrock_server_manager
             }
         }
 
-        public void CopyToCache(){
+        public async static void CopyToCache(){
             /// Copy private files to cache.
-            
-            ConfigData cfgDATA = null;
-            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            await Task.Run(() =>
             {
-                JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
-            }
+                ConfigData cfgDATA = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                }
 
-            if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false){
-                Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\temp");
+                if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false){
+                    Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\temp");
+                }
+                FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", true);
+                FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", true);
+                FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", true);
+                FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", true);
+                FileCopy(@cfgDATA.location + @"\valid_known_packs.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", true);
+                DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds");
+                DirectoryCopy(@cfgDATA.location + @"\world_templates", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates");
+                DirectoryCopy(@cfgDATA.location + @"\development_behavior_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs");
+                DirectoryCopy(@cfgDATA.location + @"\development_resource_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs");
+                DirectoryCopy(@cfgDATA.location + @"\development_skin_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs");
             }
-            FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", true);
-            FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", true);
-            FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", true);
-            FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", true);
-            FileCopy(@cfgDATA.location + @"\valid_known_packs.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", true);
-            DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds");
-            DirectoryCopy(@cfgDATA.location + @"\world_templates", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates");
-            DirectoryCopy(@cfgDATA.location + @"\development_behavior_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs");
-            DirectoryCopy(@cfgDATA.location + @"\development_resource_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs");
-            DirectoryCopy(@cfgDATA.location + @"\development_skin_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs");
         }
 
-        public void CopyFromCache(){
+        public async static void CopyFromCache(){
             /// Copy private files from cache.
-            ConfigData cfgDATA = null;
-            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            await Task.Run(() =>
             {
-                JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
-            }
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", @cfgDATA.location + @"\permissions.json", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", @cfgDATA.location + @"\server.properties", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", @cfgDATA.location + @"\allowlist.json", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", @cfgDATA.location + @"\whitelist.json", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", @cfgDATA.location + @"\valid_known_packs.json", true);
-            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds", @cfgDATA.location + @"\worlds");
-            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates", @cfgDATA.location + @"\world_templates");
-            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs", @cfgDATA.location + @"\development_behavior_packs");
-            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs", @cfgDATA.location + @"\development_resource_packs");
-            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs", @cfgDATA.location + @"\development_skin_packs");
+                ConfigData cfgDATA = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                }
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", @cfgDATA.location + @"\permissions.json", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", @cfgDATA.location + @"\server.properties", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", @cfgDATA.location + @"\allowlist.json", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", @cfgDATA.location + @"\whitelist.json", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", @cfgDATA.location + @"\valid_known_packs.json", true);
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds", @cfgDATA.location + @"\worlds");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates", @cfgDATA.location + @"\world_templates");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs", @cfgDATA.location + @"\development_behavior_packs");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs", @cfgDATA.location + @"\development_resource_packs");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs", @cfgDATA.location + @"\development_skin_packs");
+            });
+
+        }
+
+        public static void AllBackUp()
+        {
+
         }
 
         public void LoadServerSetting(string fileLocation)
@@ -484,10 +494,7 @@ namespace bedrock_server_manager
             }
             MessageBoxResult ans = MessageBox.Show("アップデートを実行してもよろしいですか？\nアップデート作業中はBE Server Managerは操作できなくなります。\nサーバーが実行されている場合は停止します。", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
             Console.WriteLine(ans);
-            if (ans != MessageBoxResult.OK)
-            {
-                return;
-            }
+            if (ans != MessageBoxResult.OK) { return; }
 
             Process[] ps = Process.GetProcessesByName("bedrock_server");
 
@@ -512,12 +519,8 @@ namespace bedrock_server_manager
                 cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
             }
 
+            CopyToCache();
 
-            FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\permissions.json", true);
-            FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\server.properties", true);
-            FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\allowlist.json", true);
-            FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\whitelist.json", true);
-            DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\worlds");
 
             WebClient mywebClient = new WebClient();
             Console.WriteLine("Start task...");
@@ -549,11 +552,7 @@ namespace bedrock_server_manager
                 return;
             }
             await Task.Delay(1000);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\permissions.json", @cfgDATA.location + @"\permissions.json", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\server.properties", @cfgDATA.location + @"\server.properties", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\allowlist.json", @cfgDATA.location + @"\allowlist.json", true);
-            FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\whitelist.json", @cfgDATA.location + @"\whitelist.json", true);
-            DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\worlds", @cfgDATA.location + @"\worlds");
+            CopyFromCache();
             File.Delete(@"tmp\Minecraft_BedrockServer.zip");
             MessageBox.Show("アップデートが完了しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
@@ -626,6 +625,22 @@ namespace bedrock_server_manager
         private void openConfigUpdate(object sender, RoutedEventArgs e)
         {
             settingUpdate window = new settingUpdate();
+            window.ShowDialog();
+        }
+
+        private void openInfo(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(@"BE Server Manager
+Minecraft Vanilla Dedicated Server Manager for Bedrock Edition
+Version: " + ApplicationVersion + @"
+Developed by NattyanTV
+
+This application is not provided by Microsoft or Mojang in any way and has been developed independently.", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void openConfigDiscord(object sender, RoutedEventArgs e)
+        {
+            settingDiscord window = new settingDiscord();
             window.ShowDialog();
         }
     }

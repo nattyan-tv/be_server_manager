@@ -1,0 +1,27 @@
+﻿<Window x:Class="bedrock_server_manager.settingDiscord"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:bedrock_server_manager"
+        mc:Ignorable="d"
+        Title="Discord BOTの設定" Height="335" Width="574" Closing="Window_Closing">
+    <Grid>
+        <Label FontSize="18" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="DiscordBOTの設定"/>
+        <Label Margin="10,49,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="DiscordBOTを作成することで、Discordにコマンドを送信するだけでMinecraftサーバーを操作できます。"/>
+        <CheckBox x:Name="botbox" Content="DiscordBOTを有効にする" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top" Click="BoxChanged"/>
+        <Label Margin="10,108,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="BOTのTOKEN："/>
+        <PasswordBox x:Name="bottoken" Margin="106,108,10,0" VerticalAlignment="Top" Height="26" PasswordChanged="changed"/>
+        <Label Margin="10,139,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="BOTのプリフィックス：" IsEnabled="False"/>
+        <TextBox x:Name="botprefix" Margin="127,139,10,0" TextWrapping="Wrap" Text="m!" VerticalAlignment="Top" Height="26" IsEnabled="False" TextChanged="changed"/>
+        <Label Margin="10,179,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Span>
+                <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://nattyan-tv.github.io/bedrock_server_manager/notes/discord_bot">DiscordBOTの設定方法</Hyperlink>
+                <LineBreak/>
+                <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://discord.dev">Discord Developer Portal</Hyperlink>
+            </Span>
+        </Label>
+        <Button Content="保存" Margin="0,0,10,10" HorizontalAlignment="Right" Width="191" Height="44" VerticalAlignment="Bottom" Click="Button_Click"/>
+
+    </Grid>
+</Window>

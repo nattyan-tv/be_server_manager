@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,12 +17,10 @@ using System.Windows.Shapes;
 namespace bedrock_server_manager
 {
     /// <summary>
-    /// settingUpdate.xaml の相互作用ロジック
+    /// settingDiscord.xaml の相互作用ロジック
     /// </summary>
-    public partial class settingUpdate : Window
+    public partial class settingDiscord : Window
     {
-
-        public bool setted = true;
         public class ConfigData
         {
             public string name { get; set; }
@@ -39,19 +35,14 @@ namespace bedrock_server_manager
             public string botPrefix { get; set; }
         }
 
-        private void textBoxTime_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        public bool setted = false;
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            e.Handled = !new Regex("[0-9:]").IsMatch(e.Text);
-        }
-        private void textBoxTime_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (e.Command == ApplicationCommands.Paste)
-            {
-                e.Handled = true;
-            }
+            System.Diagnostics.Process.Start(e.Uri.ToString());
         }
 
-        public settingUpdate()
+        public settingDiscord()
         {
             InitializeComponent();
             ConfigData cfgDATA = null;
@@ -60,37 +51,19 @@ namespace bedrock_server_manager
                 JsonSerializer serializer = new JsonSerializer();
                 cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
             }
-            Console.WriteLine(cfgDATA.update);
-            if (cfgDATA.autoupdate)
-            {
-                updateTime.Text = cfgDATA.update;
-                updateTime.IsEnabled = true;
-                AutoUpdate.IsChecked = true;
-            }
-            else
-            {
-                updateTime.IsEnabled = false;
-                AutoUpdate.IsChecked = false;
-            }
-            setted = true;
+            bottoken.Password = cfgDATA.botToken;
+            botprefix.Text = cfgDATA.botPrefix;
+            setted = false;
         }
 
-        private void saveSettings(object sender, RoutedEventArgs e)
+        private void BoxChanged(object sender, RoutedEventArgs e)
         {
-            DateTime dt;
-            Console.WriteLine(updateTime.Text);
+            botprefix.IsEnabled = (bool)botbox.IsChecked;
+            bottoken.IsEnabled = (bool)botbox.IsChecked;
+        }
 
-            if (updateTime.Text.Length == 4)
-            {
-                updateTime.Text = "0" + updateTime.Text;
-            }
-
-            if (!DateTime.TryParseExact(updateTime.Text, "HH:mm", null, DateTimeStyles.AssumeLocal, out dt))
-            {
-                MessageBox.Show("アップデートの時間指定が異常です。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
             ConfigData BASEcfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
@@ -102,31 +75,25 @@ namespace bedrock_server_manager
                 name = BASEcfgDATA.name,
                 location = @BASEcfgDATA.location,
                 seed = BASEcfgDATA.seed,
-                update = updateTime.Text,
+                update = BASEcfgDATA.update,
                 backup = BASEcfgDATA.backup,
                 backupTime = BASEcfgDATA.backupTime,
-                autoupdate = (bool)AutoUpdate.IsChecked,
+                autoupdate = BASEcfgDATA.autoupdate,
                 autobackup = BASEcfgDATA.autobackup,
-                botToken = "",
-                botPrefix = ""
+                botToken = bottoken.Password,
+                botPrefix = botprefix.Text
             };
-            Console.WriteLine(updateTime.Text);
-            Console.WriteLine(AutoUpdate.IsChecked);
+            Console.WriteLine(bottoken.Password);
+            Console.WriteLine(botprefix.Text);
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
-            setted = true;
+            setted = false;
             Close();
         }
 
-        private void AutoBackup_Clicked(object sender, RoutedEventArgs e)
+        private void changed(object sender, RoutedEventArgs e)
         {
-            updateTime.IsEnabled = !updateTime.IsEnabled;
-            setted = false;
-        }
-
-        private void updateTime_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            setted = false;
+            setted = true;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

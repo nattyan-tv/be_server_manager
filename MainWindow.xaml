@@ -19,11 +19,11 @@
                 <MenuItem Header="各種設定">
                     <MenuItem Header="バックアップ設定" Click="openConfigBackup"/>
                     <MenuItem Header="アップデート設定" Click="openConfigUpdate" />
-                    <MenuItem Header="DiscordBOT設定" />
+                    <MenuItem Header="DiscordBOT設定" Click="openConfigDiscord" />
                 </MenuItem>
 
                 <MenuItem Header="ヘルプ">
-                    <MenuItem Header="BE Server Managerのバージョン情報"/>
+                    <MenuItem Header="BE Server Managerのバージョン情報" Click="openInfo"/>
                 </MenuItem>
 
             </Menu>
