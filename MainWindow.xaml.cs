@@ -341,7 +341,6 @@ namespace bedrock_server_manager
                 {
                     StartInfo = new ProcessStartInfo("python/getLatestVersion.exe")
                     {
-                        Arguments = "-getLatest",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
@@ -380,6 +379,7 @@ namespace bedrock_server_manager
             catch (Exception err)
             {
                 MessageBox.Show("起動中にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine("Sorry. An error has occurred.\n\n" + err);
                 Close();
             }
             
@@ -478,9 +478,8 @@ namespace bedrock_server_manager
             Console.WriteLine("Start task...");
             var dlLink = new Process
             {
-                StartInfo = new ProcessStartInfo("python/BE_Server_Manager_MAIN.exe")
+                StartInfo = new ProcessStartInfo("python/getLatestVersion.exe")
                 {
-                    Arguments = "-getLatest",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true

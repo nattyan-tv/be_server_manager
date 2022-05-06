@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="bedrock_server_manager.firstSession"
         xmlns:form="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         mc:Ignorable="d"
-        Title="Welcome to BE Server Manager" Height="465" Width="630" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" Closing="Window_Closing" MinWidth="630" MaxWidth="630" MinHeight="465" MaxHeight="465">
+        Title="Welcome to BE Server Manager" Height="465" Width="630" ResizeMode="CanResize" WindowStartupLocation="CenterScreen" WindowStyle="ToolWindow" Closing="Window_Closing" MinWidth="630" MaxWidth="630" MinHeight="465" MaxHeight="465" HorizontalAlignment="Left" VerticalAlignment="Top" SizeToContent="WidthAndHeight">
     <Grid Margin="0,0,0,0">
         <Label Content="サーバー名：" Margin="10,68,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI" HorizontalAlignment="Left"/>
         <Label Content="シード値：" Margin="10,104,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI" HorizontalAlignment="Left"/>
@@ -17,11 +17,11 @@
         <TextBox x:Name="server_name" Margin="104,68,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16"/>
         <TextBox x:Name="server_seed" Margin="91,104,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16"/>
         <Label Content="BE Server Mangerへようこそ。&#xA;まずは初回設定をしてください。" Margin="10,10,10,0" VerticalAlignment="Top"/>
-        <Button Content="保存する" Margin="431,0,10,10" FontSize="16" Click="saveAndStart" Height="52" VerticalAlignment="Bottom"/>
-        <CheckBox x:Name="AutoBackup" Content="自動でバックアップを行う" HorizontalAlignment="Left" Margin="10,184,0,0" VerticalAlignment="Top" FontSize="16" Click="AutoBackup_Clicked"/>
-        <Label Content="バックアップ場所：" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI"/>
-        <TextBox x:Name="serverBackup" IsReadOnly="True" Margin="144,0,89,0" TextWrapping="Wrap" VerticalAlignment="Center" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16"/>
-        <Button x:Name="backupButton" Content="参照" Margin="546,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="74" Height="31" FontSize="16" Click="changeBackupLocation" IsEnabled="False"/>
+        <Button Content="保存する" Margin="0,0,10,10" FontSize="16" Click="saveAndStart" HorizontalAlignment="Right" Width="290" Height="49" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="AutoBackup" Content="自動でバックアップを行う" HorizontalAlignment="Left" Margin="10,176,0,0" VerticalAlignment="Top" FontSize="16" Click="AutoBackup_Clicked"/>
+        <Label Content="バックアップ場所：" HorizontalAlignment="Left" Margin="10,209,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
+        <TextBox x:Name="serverBackup" IsReadOnly="True" Margin="144,209,89,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16"/>
+        <Button x:Name="backupButton" Content="参照" Margin="0,0,10,0" VerticalAlignment="Center" Height="31" FontSize="16" Click="changeBackupLocation" IsEnabled="False" HorizontalAlignment="Right" Width="74"/>
         <CheckBox x:Name="AutoUpdate" Content="自動でアップデートを行う" HorizontalAlignment="Left" Margin="10,295,0,0" VerticalAlignment="Top" FontSize="16" Click="AutoUpdate_Clicked"/>
         <Label Content="アップデート確認時間（毎日）：" HorizontalAlignment="Left" Margin="10,320,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
         <TextBox x:Name="updateTime" Margin="237,320,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="00:00" IsEnabled="False"  InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxTime_PreviewTextInput" CommandManager.PreviewExecuted="textBoxTime_PreviewExecuted"/>
