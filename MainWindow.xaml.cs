@@ -407,11 +407,8 @@ namespace bedrock_server_manager
                 dlLink.WaitForExit();
                 dlLink.Close();
                 Console.WriteLine("Connection all rights.\n" + downloadLink);
-
-                Match match1 = Regex.Match(downloadLink, @"https://minecraft.azureedge.net/bin-win/bedrock-server-[0-9.-]+.zip");
-                downloadLink = match1.Value;
                 latestVersion = downloadLink.Replace("https://minecraft.azureedge.net/bin-win/bedrock-server-", "").Replace(".zip", "");
-                Console.WriteLine(latestVersion);
+                Console.WriteLine("配信されている最新バージョン:" + latestVersion);
                 string[] lb = new string[latestVersion.Split('.').Length - 1];
                 Array.Copy(latestVersion.Split('.'), 0, lb, 0, latestVersion.Split('.').Length - 1);
                 string lv = string.Join(".", lb);
@@ -426,8 +423,18 @@ namespace bedrock_server_manager
                     config_server_name.Text = cfgDATA.name;
                     serverLocation.Text = cfgDATA.location;
                     config_level_seed.Text = cfgDATA.seed;
-                    if (Directory.Exists(@cfgDATA.location + @"\behavior_packs\vanilla_" + lv)){ Console.WriteLine("最新バージョンです。"); }
-                    else{ MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
+                    if (File.Exists(@cfgDATA.location + @"\version.txt"))
+                    {
+                        using (StreamReader sr = new StreamReader(
+                            "readme.txt", Encoding.GetEncoding("UTF-8"))) {
+                            currentVersion = sr.ReadToEnd();
+                        }
+                        Console.Write("Current Version: " + currentVersion);
+                        if (latestVersion == currentVersion){ Console.WriteLine("最新バージョンです。"); }
+                        else{ MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
+                    }
+                    else
+                    { MessageBox.Show("バージョンファイルが見つかりませんでした。\n現在のバージョンは不明ですが「更新」ボタンを押すことで、最新バージョンへのアップデート及びバージョンファイルの作成が行われます。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
                 }
                 changeLog = 0;
             }
@@ -437,10 +444,6 @@ namespace bedrock_server_manager
                 Console.WriteLine("Sorry. An error has occurred.\n\n" + err);
                 Close();
             }
-            
-            
-
-
         }
 
         private void changeServerLocation(object sender, RoutedEventArgs e)
@@ -538,6 +541,9 @@ namespace bedrock_server_manager
             downloadLink = dl.ReadLine().Replace("\r", "").Replace("\n", "");
             dlLink.WaitForExit();
             dlLink.Close();
+            Console.WriteLine("Download link: " + downloadLink);
+            latestVersion = downloadLink.Replace("https://minecraft.azureedge.net/bin-win/bedrock-server-", "").Replace(".zip", "");
+            Console.WriteLine("Latest version: " + latestVersion);
             mywebClient.DownloadFile(downloadLink, @"tmp\Minecraft_BedrockServer.zip");
             DirectoryInfo gamedir = new DirectoryInfo(@cfgDATA.location);
             try
@@ -551,6 +557,13 @@ namespace bedrock_server_manager
                 MessageBox.Show("アップデート中にエラーが発生しました。\nセーブデータのバックアップは「" + @AppDomain.CurrentDomain.BaseDirectory + @"\tmp" + "」内にあります。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
                 return;
             }
+
+            Encoding utf8 = Encoding.GetEncoding("UTF-8");
+            using (StreamWriter writer = new StreamWriter(@cfgDATA.location + @"\versioin.txt", false, utf8))
+            {
+                writer.WriteLine(latestVersion);
+            }
+
             await Task.Delay(1000);
             CopyFromCache();
             File.Delete(@"tmp\Minecraft_BedrockServer.zip");
