@@ -5,23 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:bedrock_server_manager"
         mc:Ignorable="d"
-        Title="Discord BOTの設定" Height="335" Width="574" Closing="Window_Closing">
+        Title="Discord BOTの設定" Height="407" Width="574" Closing="Window_Closing">
     <Grid>
         <Label FontSize="18" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="DiscordBOTの設定"/>
         <Label Margin="10,49,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="DiscordBOTを作成することで、Discordにコマンドを送信するだけでMinecraftサーバーを操作できます。"/>
         <CheckBox x:Name="botbox" Content="DiscordBOTを有効にする" HorizontalAlignment="Left" Margin="10,88,0,0" VerticalAlignment="Top" Click="BoxChanged"/>
         <Label Margin="10,108,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="BOTのTOKEN："/>
-        <PasswordBox x:Name="bottoken" Margin="106,108,10,0" VerticalAlignment="Top" Height="26" PasswordChanged="changed"/>
-        <Label Margin="10,139,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="BOTのプリフィックス：" IsEnabled="False"/>
+        <PasswordBox x:Name="bottoken" Margin="106,108,10,0" VerticalAlignment="Top" Height="26" PasswordChanged="changed" IsEnabled="False"/>
+        <Label Margin="10,139,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="BOTのプリフィックス："/>
         <TextBox x:Name="botprefix" Margin="127,139,10,0" TextWrapping="Wrap" Text="m!" VerticalAlignment="Top" Height="26" IsEnabled="False" TextChanged="changed"/>
-        <Label Margin="10,179,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Label Margin="10,268,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
             <Span>
+                ご確認ください：
                 <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://nattyan-tv.github.io/bedrock_server_manager/notes/discord_bot">DiscordBOTの設定方法</Hyperlink>
                 <LineBreak/>
                 <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://discord.dev">Discord Developer Portal</Hyperlink>
             </Span>
         </Label>
         <Button Content="保存" Margin="0,0,10,10" HorizontalAlignment="Right" Width="191" Height="44" VerticalAlignment="Bottom" Click="Button_Click"/>
+        <Label Margin="10,175,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="SlashCommandのサーバー："/>
+        <TextBox x:Name="bot_guilds" Margin="164,175,10,0" VerticalAlignment="Top" Height="26" TextChanged="changed" IsEnabled="False" Text="12345679,987654321"/>
+        <Label Margin="10,206,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="コマンド操作権があるユーザー："/>
+        <TextBox x:Name="bot_users" Margin="172,206,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="26" TextChanged="changed" Text="123465789,987654321" IsEnabled="False"/>
+        <Label Margin="10,237,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="ここで変更した設定を適応するには「/reload」または「reload」コマンドを送信して、BOTを再起動してください。"/>
 
     </Grid>
 </Window>

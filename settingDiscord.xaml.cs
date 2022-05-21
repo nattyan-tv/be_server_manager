@@ -35,6 +35,12 @@ namespace bedrock_server_manager
             public string botPrefix { get; set; }
         }
 
+        public class DiscordBotSetting
+        {
+            public string[] guild_ids { get; set; }
+            public string[] bot_admins { get; set; }
+        }
+
         public bool setted = false;
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -60,6 +66,8 @@ namespace bedrock_server_manager
         {
             botprefix.IsEnabled = (bool)botbox.IsChecked;
             bottoken.IsEnabled = (bool)botbox.IsChecked;
+            bot_guilds.IsEnabled = (bool)botbox.IsChecked;
+            bot_users.IsEnabled = (bool)botbox.IsChecked;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -83,10 +91,19 @@ namespace bedrock_server_manager
                 botToken = bottoken.Password,
                 botPrefix = botprefix.Text
             };
+
+            DiscordBotSetting DisData = new DiscordBotSetting
+            {
+                guild_ids = bot_guilds.Text.Split(','),
+                bot_admins = bot_users.Text.Split(',')
+            };
+
             Console.WriteLine(bottoken.Password);
             Console.WriteLine(botprefix.Text);
-            string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
-            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
+            string jsonConfig = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
+            string jsonDiscord = JsonConvert.SerializeObject(DisData, Formatting.Indented);
+            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", jsonConfig);
+            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\discord.json", jsonDiscord);
             setted = false;
             Close();
         }

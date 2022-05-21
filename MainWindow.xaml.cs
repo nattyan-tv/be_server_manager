@@ -189,7 +189,7 @@ namespace bedrock_server_manager
                     cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
                 }
 
-                if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false){
+                if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false) {
                     Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\temp");
                 }
                 FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", true);
@@ -202,7 +202,7 @@ namespace bedrock_server_manager
                 DirectoryCopy(@cfgDATA.location + @"\development_behavior_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs");
                 DirectoryCopy(@cfgDATA.location + @"\development_resource_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs");
                 DirectoryCopy(@cfgDATA.location + @"\development_skin_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs");
-            }
+            });
         }
 
         public async static void CopyFromCache(){
@@ -426,10 +426,11 @@ namespace bedrock_server_manager
                     if (File.Exists(@cfgDATA.location + @"\version.txt"))
                     {
                         using (StreamReader sr = new StreamReader(
-                            "readme.txt", Encoding.GetEncoding("UTF-8"))) {
-                            currentVersion = sr.ReadToEnd();
+                            @cfgDATA.location + @"\version.txt", Encoding.GetEncoding("UTF-8"))) {
+                            currentVersion = sr.ReadToEnd().Replace("\r", "").Replace("\n", "");
                         }
-                        Console.Write("Current Version: " + currentVersion);
+                        Console.WriteLine("Latest Version: " + latestVersion);
+                        Console.WriteLine("Current Version: " + currentVersion);
                         if (latestVersion == currentVersion){ Console.WriteLine("最新バージョンです。"); }
                         else{ MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
                     }
@@ -559,7 +560,7 @@ namespace bedrock_server_manager
             }
 
             Encoding utf8 = Encoding.GetEncoding("UTF-8");
-            using (StreamWriter writer = new StreamWriter(@cfgDATA.location + @"\versioin.txt", false, utf8))
+            using (StreamWriter writer = new StreamWriter(@cfgDATA.location + @"\version.txt", false, utf8))
             {
                 writer.WriteLine(latestVersion);
             }
