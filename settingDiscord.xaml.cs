@@ -57,8 +57,26 @@ namespace bedrock_server_manager
                 JsonSerializer serializer = new JsonSerializer();
                 cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
             }
+            DiscordBotSetting disSet = null;
+
+            if (File.Exists(@cfgDATA.location + @"\discord.json")) {
+                botbox.IsChecked = true;
+                botprefix.IsEnabled = true;
+                bottoken.IsEnabled = true;
+                bot_guilds.IsEnabled = true;
+                bot_users.IsEnabled = true;
+                using (StreamReader file = File.OpenText(@cfgDATA.location + @"\discord.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    disSet = (DiscordBotSetting)serializer.Deserialize(file, typeof(DiscordBotSetting));
+                }
+                bot_guilds.Text = string.Join(",", disSet.guild_ids);
+                bot_users.Text = string.Join(",", disSet.bot_admins);
+            }
+
             bottoken.Password = cfgDATA.botToken;
             botprefix.Text = cfgDATA.botPrefix;
+
             setted = false;
         }
 
@@ -102,8 +120,8 @@ namespace bedrock_server_manager
             Console.WriteLine(botprefix.Text);
             string jsonConfig = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             string jsonDiscord = JsonConvert.SerializeObject(DisData, Formatting.Indented);
-            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", jsonConfig);
-            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\discord.json", jsonDiscord);
+            File.WriteAllText(@cfgDATA.location + @"\setting.json", jsonConfig);
+            File.WriteAllText(@cfgDATA.location + @"\discord.json", jsonDiscord);
             setted = false;
             Close();
         }
@@ -115,7 +133,7 @@ namespace bedrock_server_manager
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!setted)
+            if (setted)
             {
                 MessageBoxResult ans_c = MessageBox.Show("保存していない項目があるようです。\n保存しなくてもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
                 Console.WriteLine(ans_c);

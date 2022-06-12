@@ -311,28 +311,30 @@ namespace bedrock_server_manager
             }
             StreamReader rfile = new StreamReader(@fileLocation);
             string all_content = rfile.ReadToEnd();
-            string[] content = rfile.ReadToEnd().Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
+            string[] content = all_content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
             rfile.Close();
-            foreach (string item in content)
+            List<string> contents = new List<string>(content);
+            foreach (string item in contents)
             {
-
-                if (item.IndexOf("=") != -1 && !item.StartsWith("#") && items.Contains(item))
+                if (item.IndexOf("=") != -1 && !item.StartsWith("#") && items.Contains(item.Split('=')[0]))
                 {
                     string settingItem = item.Split('=')[0].Replace("-", "_").Replace(".", "_");
-
                     TextBox tb = FindName("config_" + settingItem) as TextBox;
                     ComboBox cb = FindName("config_" + settingItem) as ComboBox;
                     if (tb != null)
                     {
+                        string replaceText = settingItem.Replace("_", "-") + "=" + tb.Text;
+                        all_content = all_content.Replace(item, replaceText);
                         Console.WriteLine("TB: " + item);
-                        all_content.Replace(item, settingItem + "=" + tb.Text);
+                        items.Remove(settingItem.Replace("_", "-"));
                     }
                     else if (cb != null)
                     {
+                        string replaceText = settingItem.Replace("_", "-") + "=" + cb.Text;
+                        all_content = all_content.Replace(item, replaceText);
                         Console.WriteLine("CB: " + item);
-                        all_content.Replace(item, settingItem + "=" + cb.Text);
+                        items.Remove(settingItem.Replace("_", "-"));
                     }
-                    items.Remove(settingItem);
                 }
             }
             if (items.Count() != 0)
@@ -355,7 +357,7 @@ namespace bedrock_server_manager
                     }
                 }
             }
-
+            all_content = all_content.Replace("\r\n", "\n").Substring(0, all_content.Length - 1);
             StreamWriter wfile = new StreamWriter(@fileLocation, false);
             wfile.WriteLine(all_content);
             wfile.Close();
@@ -656,6 +658,20 @@ This application is not provided by Microsoft or Mojang in any way and has been 
         {
             settingDiscord window = new settingDiscord();
             window.ShowDialog();
+        }
+
+        private void launchDiscordBOT(object sender, RoutedEventArgs e)
+        {
+            var DiscordBOT = new Process
+            {
+                StartInfo = new ProcessStartInfo(@AppDomain.CurrentDomain.BaseDirectory + @"\bedrock_server.exe")
+                {
+                    UseShellExecute = true,
+                    RedirectStandardOutput = false,
+                    CreateNoWindow = false
+                }
+            };
+            DiscordBOT.Start();
         }
     }
 }
