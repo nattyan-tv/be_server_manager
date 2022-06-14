@@ -1,18 +1,43 @@
-import os
-import sys
-import json
-import asyncio
-import datetime
-import re
-import subprocess
-import shutil
-import traceback
-import aiohttp
-from mcstatus import MinecraftBedrockServer as mcb
-import psutil
-import requests
-import discord
-from discord.ext import commands
+try:
+    import os
+    import sys
+    import json
+    import asyncio
+    import datetime
+    import re
+    import subprocess
+    import shutil
+    import traceback
+    import aiohttp
+    from mcstatus import MinecraftBedrockServer as mcb
+    import psutil
+    import requests
+    import discord
+    from discord.ext import commands
+    print("モジュールインポート完了")
+except Exception as err:
+    try:
+        print(f"Install modules...", file=sys.stderr)
+        pip.main(['install', '-r', f'{sys.path[0]}/requirements.txt'])
+        import os
+        import sys
+        import json
+        import asyncio
+        import datetime
+        import re
+        import subprocess
+        import shutil
+        import traceback
+        import aiohttp
+        from mcstatus import MinecraftBedrockServer as mcb
+        import psutil
+        import requests
+        import discord
+        from discord.ext import commands
+        print("モジュールインポート完了")
+    except Exception as err:
+        print(f"An error has occurred.\n{err}\n\n開発者にお問い合わせください。")
+        os._exit(1)
 
 
 #LATEST_URL = "https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip"
