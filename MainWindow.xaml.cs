@@ -301,7 +301,8 @@ namespace bedrock_server_manager
                 "player-movement-distance-threshold",
                 "player-movement-duration-threshold-in-ms",
                 "player-movement-score-threshold",
-                "level-name"
+                "level-name",
+                "allow-list"
             };
             if (!File.Exists(fileLocation))
             {

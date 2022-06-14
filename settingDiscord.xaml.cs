@@ -59,13 +59,13 @@ namespace bedrock_server_manager
             }
             DiscordBotSetting disSet = null;
 
-            if (File.Exists(@cfgDATA.location + @"\discord.json")) {
+            if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\discord.json")) {
                 botbox.IsChecked = true;
                 botprefix.IsEnabled = true;
                 bottoken.IsEnabled = true;
                 bot_guilds.IsEnabled = true;
                 bot_users.IsEnabled = true;
-                using (StreamReader file = File.OpenText(@cfgDATA.location + @"\discord.json"))
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\discord.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     disSet = (DiscordBotSetting)serializer.Deserialize(file, typeof(DiscordBotSetting));
@@ -120,8 +120,8 @@ namespace bedrock_server_manager
             Console.WriteLine(botprefix.Text);
             string jsonConfig = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             string jsonDiscord = JsonConvert.SerializeObject(DisData, Formatting.Indented);
-            File.WriteAllText(@cfgDATA.location + @"\setting.json", jsonConfig);
-            File.WriteAllText(@cfgDATA.location + @"\discord.json", jsonDiscord);
+            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", jsonConfig);
+            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\discord.json", jsonDiscord);
             setted = false;
             Close();
         }

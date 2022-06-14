@@ -164,6 +164,7 @@ ipv6 = serverSetting["server_portv6"]
 
 @bot.event
 async def on_ready():
+    await bot.change_presence(activity=discord.Game(name=f"{PREFIX} | Minecraft BE", type=1), status=discord.Status.online)
     print(f"""\
 DiscordBot Launched...
 
@@ -179,7 +180,12 @@ NeedUpdate:[{checkCurrentVersion() != checkLatestVersion()}]""")
 
 @bot.event
 async def on_command_error(ctx: commands.Context, event: Exception):
-    await ctx.reply(embed=discord.Embed(title="Error", description=f"内部エラーが発生しました。\n```sh\n{str(event)}```\n```sh\n{traceback.format_exc()}```", color=0xFF0000))
+    if isinstance(event, discord.ext.commands.ArgumentParsingError):
+        await ctx.send(embed=discord.Embed(title="Error: ArgumentParsingError", description=f"コマンドの引数指定方法がおかしいです。", color=0xFF0000))
+    elif isinstance(event, discord.ext.commands.CommandNotFound):
+        await ctx.send(embed=discord.Embed(title="Error: CommandNotFound", description=f"コマンドが見つかりませんでした。\n`{PREFIX}help`をご確認ください。", color=0xFF0000))
+    else:
+        await ctx.send(embed=discord.Embed(title="Error", description=f"内部エラーが発生しました。\n```sh\n{str(event)}```\n```sh\n{traceback.format_exc()}```", color=0xFF0000))
 
 
 @bot.command()
@@ -291,7 +297,37 @@ async def update(ctx: commands.Context):
 
 
 @bot.command()
-async def whitelist(ctx: commands.Context):
+async def whitelist(ctx: commands.Context, commandType: str, name: str):
+    if checkExist():
+        if commandType == "add":
+            whitelist = list
+            if os.path.isfile(f"{DIR}/whitelist.json"):
+                whitelist = json.load(open(f"{DIR}\\whitelist.json"))
+            else:
+                whitelist = []
+            whitelist.append({"ignoresPlayerLimit": False, "name": name})
+            json.dump(whitelist, open(f"{DIR}\\whitelist.json", "w"), indent=4)
+            await ctx.reply(embed=discord.Embed(title="Success", description=f"`{name}`をホワイトリストに追加しました。", color=0x477a1e))
+        elif commandType == "del":
+            whitelist = list
+            if os.path.isfile(f"{DIR}/whitelist.json"):
+                whitelist = json.load(open(f"{DIR}\\whitelist.json"))
+            else:
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"ホワイトリストが存在しません。", color=0xff0000))
+                return
+            for i in whitelist:
+                if i["name"] == name:
+                    whitelist.remove(i)
+                    json.dump(whitelist, open(
+                        f"{DIR}\\whitelist.json", "w"), indent=4)
+                    await ctx.reply(embed=discord.Embed(title="Success", description=f"`{name}`をホワイトリストから削除しました。", color=0x477a1e))
+                    return
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"`{name}`はホワイトリストに存在しません。", color=0xff0000))
+        else:
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"`{commandType}`は存在しないコマンド種類です。\n`{PREFIX}whitelist [add/del] [ユーザー名]`", color=0xff0000))
+        return
+    else:
+        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
     return
 
 
@@ -317,7 +353,7 @@ async def help(ctx: commands.Context):
 `{PREFIX}restart`: サーバーを再起動します。
 `{PREFIX}update`: サーバーを更新します。
 `{PREFIX}update force`: サーバーを強制更新します。
-`{PREFIX}whitelist`: サーバーのホワイトリストの設定を行います。
+`{PREFIX}whitelist [add/del] [ユーザー名]`: サーバーのホワイトリストの設定を行います。
 `{PREFIX}backup`: サーバーのバックアップを作成します。
 `{PREFIX}reload`: 設定ファイルなどの変更をDiscordBOTに適応させます。
 `{PREFIX}help`: このヘルプを表示します。""", color=0x477a1e))
