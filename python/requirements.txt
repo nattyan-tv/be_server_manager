@@ -1,0 +1,4 @@
+aiohttp
+mcstatus
+psutil
+nextcord
