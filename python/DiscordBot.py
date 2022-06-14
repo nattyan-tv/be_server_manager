@@ -1,37 +1,30 @@
+import os
+import sys
+import json
+import asyncio
+import datetime
+import re
+import subprocess
+import shutil
+import traceback
+import pip
+
 try:
-    import os
-    import sys
-    import json
-    import asyncio
-    import datetime
-    import re
-    import subprocess
-    import shutil
-    import traceback
     import aiohttp
+    import requests
     from mcstatus import MinecraftBedrockServer as mcb
     import psutil
-    import requests
     import discord
     from discord.ext import commands
     print("モジュールインポート完了")
 except Exception as err:
     try:
         print(f"Install modules...", file=sys.stderr)
-        pip.main(['install', '-r', f'{sys.path[0]}/requirements.txt'])
-        import os
-        import sys
-        import json
-        import asyncio
-        import datetime
-        import re
-        import subprocess
-        import shutil
-        import traceback
+        pip.main(['install', '-r', f'{os.getcwd()}/python/requirements.txt'])
         import aiohttp
+        import requests
         from mcstatus import MinecraftBedrockServer as mcb
         import psutil
-        import requests
         import discord
         from discord.ext import commands
         print("モジュールインポート完了")
@@ -40,9 +33,9 @@ except Exception as err:
         os._exit(1)
 
 
-#LATEST_URL = "https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip"
-#DOWNLOAD_PAGE = "https://www.minecraft.net/en-us/download/server/bedrock"
-#CHECK_VERSION_PLACE = "behavior_packs/vanilla_XXXXX"
+# LATEST_URL = "https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip"
+# DOWNLOAD_PAGE = "https://www.minecraft.net/en-us/download/server/bedrock"
+# CHECK_VERSION_PLACE = "behavior_packs/vanilla_XXXXX"
 
 
 def checkLaunching():
@@ -99,7 +92,8 @@ def checkCurrentVersion():
     # Get "version.txt"'s content from DIR directory
     with open(f"{DIR}\\version.txt", "r", encoding="utf-8") as f:
         ver = f.read()
-    ver = ver.strip().replace("\r\n", "\n").replace("\n", "")
+    ver = re.search(r"[0-9.]+", ver.strip().replace("\r\n",
+                    "\n").replace("\n", "")).group()
     return str(ver)
 
 
@@ -178,6 +172,9 @@ USER: {bot.user.name}#{bot.user.discriminator}""")
     print(f"""Current:[{checkCurrentVersion()}]
 Latest:[{checkLatestVersion()}]
 NeedUpdate:[{checkCurrentVersion() != checkLatestVersion()}]""")
+    print("\n#################################################\n")
+    print('このコンソールを閉じると、DiscordBOTは終了します。')
+    print("\n#################################################")
 
 
 @bot.event
