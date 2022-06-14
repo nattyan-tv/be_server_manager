@@ -12,7 +12,7 @@
             <Menu VerticalAlignment="Top" Height="18">
 
                 <MenuItem Header="ファイル">
-                    <MenuItem Header="DiscordBOT起動" Click="launchDiscordBOT" />
+                    <MenuItem Header="DiscordBOTの起動" Click="launchDiscordBOT" />
                     <MenuItem Header="設定を保存する" Click="saveConfig"/>
                     <MenuItem Header="終了" Click="Window_Closing" />
                 </MenuItem>

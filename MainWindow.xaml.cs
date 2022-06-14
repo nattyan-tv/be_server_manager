@@ -662,9 +662,66 @@ This application is not provided by Microsoft or Mojang in any way and has been 
 
         private void launchDiscordBOT(object sender, RoutedEventArgs e)
         {
+            if (!Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\python3"))
+            {
+                MessageBoxResult installRequire = MessageBox.Show("DiscordBOTを動作させるのに必要なファイルをダウンロードします。\nダウンロード中はBE Server Managerが操作できなくなりますがよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+                if (installRequire == OK)
+                {
+                    WebClient mywebClient = new WebClient();
+                    mywebClient.DownloadFile("https://www.python.org/ftp/python/3.10.0/python-3.10.0-embed-amd64.zip", @"tmp\python3.zip");
+                    DirectoryInfo pythonDir = new DirectoryInfo(@AppDomain.CurrentDomain.BaseDirectory + @"\python3");
+                    try
+                    {
+                        Directory.CreateDirectory(@pythonDir);
+                        ZipFile.ExtractToDirectory(@"tmp\python3.zip", @pythonDir);
+                    }
+                    catch (IOException)
+                    {
+                        MessageBox.Show("ダウンロード中にエラーが発生しました。\nネットワーク環境などをご確認ください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                        return;
+                    }
+                    string pipUrl = "https://bootstrap.pypa.io/get-pip.py";
+                    string pthContent = @"python310.zip
+.
+
+# Uncomment to run site.main() automatically
+import site";
+                    File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\python3\python310._pth", pthContent);
+                    mywebClient.DownloadFile(pipUrl, @"tmp\get-pip.py");
+                    var get_pip = new Process
+                    {
+                        StartInfo = new ProcessStartInfo(@AppDomain.CurrentDomain.BaseDirectory + @"\python3\python.exe tmp\get-pip.py")
+                        {
+                            UseShellExecute = true,
+                            RedirectStandardOutput = false,
+                            CreateNoWindow = false
+                        }
+                    };
+                    get_pip.Start();
+                    get_pip.WaitForExit();
+                    var install_requirements = new Process
+                    {
+                        StartInfo = new ProcessStartInfo(@AppDomain.CurrentDomain.BaseDirectory + @"\python3\python.exe -m pip install -u python\requirements.txt")
+                        {
+                            UseShellExecute = true,
+                            RedirectStandardOutput = false,
+                            CreateNoWindow = false
+                        }
+                    };
+                    install_requirements.Start();
+                    install_requirements.WaitForExit();
+                    MessageBox.Show("各種モジュールをインストールしました。\n再度「DiscordBOTの起動」を選択してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                else
+                {
+                    return;
+                }
+                return;
+            }
             var DiscordBOT = new Process
             {
-                StartInfo = new ProcessStartInfo(@AppDomain.CurrentDomain.BaseDirectory + @"\bedrock_server.exe")
+                StartInfo = new ProcessStartInfo(@AppDomain.CurrentDomain.BaseDirectory + @"\python3")
                 {
                     UseShellExecute = true,
                     RedirectStandardOutput = false,
