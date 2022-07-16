@@ -138,8 +138,8 @@ namespace bedrock_server_manager
                 backupTime = backupTime.Text,
                 autoupdate = BASEcfgDATA.autoupdate,
                 autobackup = (bool)AutoBackup.IsChecked,
-                botToken = "",
-                botPrefix = ""
+                botToken = BASEcfgDATA.botToken,
+                botPrefix = BASEcfgDATA.botPrefix
             };
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
