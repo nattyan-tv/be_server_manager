@@ -107,8 +107,8 @@ namespace bedrock_server_manager
                 backupTime = BASEcfgDATA.backupTime,
                 autoupdate = (bool)AutoUpdate.IsChecked,
                 autobackup = BASEcfgDATA.autobackup,
-                botToken = "",
-                botPrefix = ""
+                botToken = BASEcfgDATA.botToken,
+                botPrefix = BASEcfgDATA.botPrefix
             };
             Console.WriteLine(updateTime.Text);
             Console.WriteLine(AutoUpdate.IsChecked);
