@@ -349,12 +349,12 @@ namespace bedrock_server_manager
                     if (tb != null)
                     {
                         Console.WriteLine("TB: " + item);
-                        all_content += "\n" + settingItem + "=" + tb.Text;
+                        all_content += "\n" + settingItem.Replace("_", "-") + "=" + tb.Text;
                     }
                     else if (cb != null)
                     {
                         Console.WriteLine("CB: " + item);
-                        all_content += "\n" + settingItem + "=" + cb.Text;
+                        all_content += "\n" + settingItem.Replace("_", "-") + "=" + cb.Text;
                     }
                 }
             }
