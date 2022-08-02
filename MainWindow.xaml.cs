@@ -605,32 +605,47 @@ namespace bedrock_server_manager
 
         private void saveConfig(object sender, RoutedEventArgs e)
         {
-            ConfigData cfgDATA_bf = null;
-            using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+            try
             {
-                JsonSerializer serializer = new JsonSerializer();
-                cfgDATA_bf = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                ConfigData cfgDATA_bf = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA_bf = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                }
+                ConfigData cfgDATA = new ConfigData
+                {
+                    name = config_server_name.Text,
+                    location = serverLocation.Text,
+                    seed = @cfgDATA_bf.seed,
+                    update = @cfgDATA_bf.update,
+                    backup = @cfgDATA_bf.Text,
+                    backupTime = @cfgDATA_bf.Text,
+                    autoupdate = @cfgDATA_bf.autoupdate,
+                    autobackup = @cfgDATA_bf.IsChecked,
+                    botToken = @cfgDATA_bf.botToken,
+                    botPrefix = @cfgDATA_bf.botPrefix
+                };
+                サーバー名.Content = "サーバー名：" + config_server_name.Text;
+                string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
+                File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
+
+                SaveServerSetting(serverLocation.Text + @"\server.properties");
+
+                if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
+                {
+                    launchButton.IsEnabled = true;
+                }
+
+                changeLog = 0;
+                MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
             }
-            ConfigData cfgDATA = new ConfigData
+            catch (Exception e)
             {
-                name = config_server_name.Text,
-                location = serverLocation.Text,
-                seed = @cfgDATA_bf.seed
-            };
-            サーバー名.Content = "サーバー名：" + config_server_name.Text;
-            string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
-            File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
-
-            SaveServerSetting(serverLocation.Text + @"\server.properties");
-
-            if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
-            {
-                launchButton.IsEnabled = true;
+                MessageBox.Show("保存中にエラーが発生しました。\n\n" + e, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
             }
-
-            changeLog = 0;
-            MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
         }
 
         private void openConfigBackup(object sender, RoutedEventArgs e)

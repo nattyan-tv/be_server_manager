@@ -55,8 +55,12 @@ def stopServer():
 
 def startServer():
     """Start server"""
-    subprocess.Popen(["start", f"{DIR}\\bedrock_server.exe"],
-                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    subprocess.Popen(
+        ["start", f"{DIR}\\bedrock_server.exe"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        shell=True
+    )
 
 
 def checkExist():
@@ -83,7 +87,7 @@ def checkLatestVersion():
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.33 (KHTML, like Gecko) Chrome/90.0.123.212 Safari/537.33"}
         response = requests.get(url, headers=headers)
         return str(re.search(u"https://minecraft.azureedge.net/bin-win/bedrock-server-[0-9.-]+.zip", response.text).group().replace("https://minecraft.azureedge.net/bin-win/bedrock-server-", "").replace(".zip", ""))
-    except BaseException as err:
+    except Exception as err:
         return err
 
 
@@ -92,8 +96,10 @@ def checkCurrentVersion():
     # Get "version.txt"'s content from DIR directory
     with open(f"{DIR}\\version.txt", "r", encoding="utf-8") as f:
         ver = f.read()
-    ver = re.search(r"[0-9.]+", ver.strip().replace("\r\n",
-                    "\n").replace("\n", "")).group()
+    ver = re.search(
+        r"[0-9.]+", ver.strip().replace("\r\n",
+        "\n").replace("\n", "")
+    ).group()
     return str(ver)
 
 
@@ -101,7 +107,7 @@ async def updateServer():
     """Update server"""
     try:
         url = f"https://minecraft.azureedge.net/bin-win/bedrock-server-{checkLatestVersion()}.zip"
-        if (isinstance(url, BaseException)):
+        if (isinstance(url, Exception)):
             return False
 
         async def fetch(session, url):
@@ -116,32 +122,54 @@ async def updateServer():
 
         with open(os.path.join(sys.path[0], f"\\tmp\\{url.split('/')[-1]}"), mode='wb') as f:
             f.write(UpdateData)
-        shutil.copy(os.path.join(DIR, "\\permissions.json"),
-                    os.path.join(sys.path[0], "\\tmp\\permissions.json"))
-        shutil.copy(os.path.join(DIR, "\\server.properties"),
-                    os.path.join(sys.path[0], "\\tmp\\server.properties"))
-        shutil.copy(os.path.join(DIR, "\\allowlist.json"),
-                    os.path.join(sys.path[0], "\\tmp\\allowlist.json"))
-        shutil.copy(os.path.join(DIR, "\\whitelist.json"),
-                    os.path.join(sys.path[0], "\\tmp\\whitelist.json"))
-        shutil.copytree(os.path.join(DIR, "\\worlds"),
-                        os.path.join(sys.path[0], "\\tmp\\worlds"))
+        shutil.copy(
+            os.path.join(DIR, "\\permissions.json"),
+            os.path.join(sys.path[0], "\\tmp\\permissions.json")
+        )
+        shutil.copy(
+            os.path.join(DIR, "\\server.properties"),
+            os.path.join(sys.path[0], "\\tmp\\server.properties")
+        )
+        shutil.copy(
+            os.path.join(DIR, "\\allowlist.json"),
+            os.path.join(sys.path[0], "\\tmp\\allowlist.json")
+        )
+        shutil.copy(
+            os.path.join(DIR, "\\whitelist.json"),
+            os.path.join(sys.path[0], "\\tmp\\whitelist.json")
+        )
+        shutil.copytree(
+            os.path.join(DIR, "\\worlds"),
+            os.path.join(sys.path[0], "\\tmp\\worlds")
+        )
         shutil.rmtree(DIR)
         shutil.unpack_archive(os.path.join(
             sys.path[0], f"\\tmp\\{url.split('/')[-1]}"), os.path.join(DIR))
-        shutil.copy(os.path.join(sys.path[0], "\\tmp\\permissions.json"), os.path.join(
-            DIR, "\\permissions.json"))
-        shutil.copy(os.path.join(sys.path[0], "\\tmp\\server.properties"), os.path.join(
-            DIR, "\\server.properties"))
-        shutil.copy(os.path.join(sys.path[0], "\\tmp\\allowlist.json"), os.path.join(
-            DIR, "\\allowlist.json"))
-        shutil.copy(os.path.join(sys.path[0], "\\tmp\\whitelist.json"), os.path.join(
-            DIR, "\\whitelist.json"))
-        shutil.copytree(os.path.join(
-            sys.path[0], "\\tmp\\worlds"), os.path.join(DIR, "\\worlds"))
-        shutil.rmtree(os.path.join(sys.path[0], "\\tmp"))
+        shutil.copy(
+            os.path.join(sys.path[0], "\\tmp\\permissions.json"),
+            os.path.join(DIR, "\\permissions.json")
+        )
+        shutil.copy(
+            os.path.join(sys.path[0], "\\tmp\\server.properties"),
+            os.path.join(DIR, "\\server.properties")
+        )
+        shutil.copy(
+            os.path.join(sys.path[0], "\\tmp\\allowlist.json"),
+            os.path.join(DIR, "\\allowlist.json")
+        )
+        shutil.copy(
+            os.path.join(sys.path[0], "\\tmp\\whitelist.json"),
+            os.path.join(DIR, "\\whitelist.json")
+        )
+        shutil.copytree(
+            os.path.join(sys.path[0], "\\tmp\\worlds"),
+            os.path.join(DIR, "\\worlds")
+        )
+        shutil.rmtree(
+            os.path.join(sys.path[0], "\\tmp")
+        )
         return True
-    except BaseException as err:
+    except Exception as err:
         return err
 
 
@@ -196,7 +224,7 @@ async def status(ctx: commands.Context):
         error = None
         try:
             status = server.status()
-        except BaseException as err:
+        except Exception as err:
             error = err
         if status != None:
             await ctx.reply(
@@ -347,7 +375,10 @@ async def reload(ctx: commands.Context):
 
 @bot.command()
 async def help(ctx: commands.Context):
-    await ctx.reply(embed=discord.Embed(title="Help", description=f"""\
+    await ctx.reply(
+        embed=discord.Embed(
+            title="Help",
+            description=f"""\
 `{PREFIX}start`: サーバーを起動します。
 `{PREFIX}stop`: サーバーを停止します。
 `{PREFIX}restart`: サーバーを再起動します。
@@ -356,6 +387,9 @@ async def help(ctx: commands.Context):
 `{PREFIX}whitelist [add/del] [ユーザー名]`: サーバーのホワイトリストの設定を行います。
 `{PREFIX}backup`: サーバーのバックアップを作成します。
 `{PREFIX}reload`: 設定ファイルなどの変更をDiscordBOTに適応させます。
-`{PREFIX}help`: このヘルプを表示します。""", color=0x477a1e))
+`{PREFIX}help`: このヘルプを表示します。""",
+            color=0x477a1e
+        )
+    )
 
 bot.run(TOKEN)
