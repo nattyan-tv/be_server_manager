@@ -15,8 +15,8 @@ from tendo import singleton
 
 me = singleton.SingleInstance()
 
-backuptimeCount = 0
-updatetimeCount = 0
+backuptimeCount = 1
+updatetimeCount = 1
 
 BASE_DIR = os.getcwd()
 LOG_PLS = os.path.join(os.getcwd(), "python\\bsm_bg.log")
@@ -88,13 +88,11 @@ def loadConfig() -> BSM_Config:
 
 def backup(config: BSM_Config):
     try:
-        ZIP = zipfile.ZipFile(os.path.join(config.backup, f"{datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')}.zip"), "w")
-        ZIP.write(f"{config.location}/", os.path.basename(config.location))
-        ZIP.close()
+        shutil.make_archive(os.path.join(config.backup, datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')), format="zip", root_dir=config.location)
         logging.info(f"Backup {config.name}")
         sendLog(config.webhook, f"サーバー`{config.name}`を`{config.backup}`にバックアップしました。\n次のバックアップは{config.backupTime}分後です。")
         global backuptimeCount
-        backuptimeCount = 0
+        backuptimeCount = 1
     except Exception as err:
         logging.error(err, exc_info=True)
         sendLog(config.webhook, f"サーバー`{config.name}`のバックアップ中にエラーが発生しました。\n詳しくはログを確認してください。")
@@ -137,43 +135,40 @@ async def update(config: BSM_Config):
             UpdateData = await fetch(session, url)
 
         UpdateData = requests.get(url).content
-        os.makedirs(os.path.join(BASE_DIR, "\\tmp"), exist_ok=True)
 
-        with open(os.path.join(BASE_DIR, f"\\tmp\\{url.split('/')[-1]}"), mode='wb') as f:
+        os.makedirs(os.path.join(BASE_DIR, "temp"), exist_ok=True)
+        os.makedirs(os.path.join(BASE_DIR, "temp\\update"), exist_ok=True)
+        with open(os.path.join(BASE_DIR, f"temp\\update\\{url.split('/')[-1]}"), mode='wb') as f:
             f.write(UpdateData)
 
-        def copy(origin: str, reback: bool = False, folder: bool = False) -> None:
+        def copy(origin: str, back: bool = False, folder: bool = False) -> None:
             if not folder:
-                if not reback:
+                if not back:
                     if os.path.exists(os.path.join(DIR, origin)):
                         shutil.copy(
                             os.path.join(DIR, origin),
-                            os.path.join(BASE_DIR, f"tmp\\{origin}")
+                            os.path.join(BASE_DIR, f"temp\\")
                         )
                 else:
-                    if os.path.exists(os.path.join(BASE_DIR, f"tmp\\{origin}")):
+                    if os.path.exists(os.path.join(BASE_DIR, f"temp\\{origin}")):
                         shutil.copy(
-                            os.path.join(BASE_DIR, f"tmp\\{origin}"),
-                            os.path.join(DIR, origin)
+                            os.path.join(BASE_DIR, f"temp\\{origin}"),
+                            DIR
                         )
             else:
-                if not reback:
+                if not back:
                     if os.path.exists(os.path.join(DIR, origin)):
                         shutil.copytree(
                             os.path.join(DIR, origin),
-                            os.path.join(BASE_DIR, f"tmp\\{origin}")
+                            os.path.join(BASE_DIR, f"temp\\{origin}")
                         )
                 else:
-                    if os.path.exists(os.path.join(BASE_DIR, f"tmp\\{origin}")):
+                    if os.path.exists(os.path.join(BASE_DIR, f"temp\\{origin}")):
                         shutil.copytree(
-                            os.path.join(BASE_DIR, f"tmp\\{origin}"),
+                            os.path.join(BASE_DIR, f"temp\\{origin}"),
                             os.path.join(DIR, origin)
                         )
 
-
-        shutil.rmtree(
-            os.path.join(BASE_DIR, "tmp")
-        )
         copy("permissions.json")
         copy("server.properties")
         copy("allowlist.json")
@@ -182,24 +177,25 @@ async def update(config: BSM_Config):
         shutil.rmtree(DIR)
         shutil.unpack_archive(os.path.join(
             BASE_DIR,
-            f"tmp\\{url.split('/')[-1]}"),
+            f"temp\\update\\{url.split('/')[-1]}"),
             os.path.join(DIR)
         )
-        copy("permissions.json", reback=True)
-        copy("server.properties", reback=True)
-        copy("allowlist.json", reback=True)
-        copy("whitelist.json", reback=True)
-        copy("worlds", reback=True, folder=True)
-        shutil.rmtree(
-            os.path.join(BASE_DIR, "tmp")
-        )
+        copy("permissions.json", back=True)
+        copy("server.properties", back=True)
+        copy("allowlist.json", back=True)
+        copy("whitelist.json", back=True)
+        copy("worlds", back=True, folder=True)
+
+        with open(os.path.join(DIR, "version.txt"), mode="w") as f:
+            f.write(VERSION)
+
         logging.info(f"Update {config.name}")
         sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: アップデートを完了させました。\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
         global updatetimeCount
-        updatetimeCount = 0
+        updatetimeCount = 1
     except Exception as err:
         logging.error(err, exc_info=True)
-        sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: エラーにより中断されました。\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
+        sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: エラーにより中断されました。\nバージョン: `v{VERSION}`")
 
 
 async def main():
