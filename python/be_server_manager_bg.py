@@ -35,7 +35,7 @@ def sendLog(URL: str | None, content: str):
     if URL is not None:
         send_content = {
             "content": content,
-            "username": "BSM",
+            "username": "Bedrock Server Manager",
             "avatar_url": "https://static.wikia.nocookie.net/minecraft_ja_gamepedia/images/a/a9/Birch_Forest_Grass_Block.png"
         }
         response = requests.post(
@@ -63,9 +63,9 @@ def timing():
         global updatetimeCount
         time = datetime.datetime.now()
         config = loadConfig()
-        if config.autobackup and backuptimeCount == config.backupTime:
+        if config.autobackup and str(backuptimeCount) == config.backupTime:
             backup(config)
-        if config.autoupdate and updatetimeCount == config.updateTime:
+        if config.autoupdate and str(updatetimeCount) == config.update:
             asyncio.ensure_future(update(config))
         backuptimeCount += 1
         updatetimeCount += 1
@@ -73,7 +73,7 @@ def timing():
         logging.error(err, exc_info=True)
 
 def loadConfig() -> BSM_Config:
-    print("config loading...")
+    print(f"update: {updatetimeCount} - backup: {backuptimeCount}")
     try:
         setting = json.load(open("setting.json"))
         if os.path.exists(os.path.join(BASE_DIR, "webhook.txt")):
@@ -81,7 +81,6 @@ def loadConfig() -> BSM_Config:
         else:
             webhook = None
         config = BSM_Config(setting["name"], setting["location"], setting["update"], setting["backup"], setting["backupTime"], setting["autoupdate"], setting["autobackup"], webhook)
-        sendLog(webhook, config)
         return config
     except Exception as err:
         logging.error(err, exc_info=True)
@@ -93,10 +92,12 @@ def backup(config: BSM_Config):
         ZIP.write(f"{config.location}/", os.path.basename(config.location))
         ZIP.close()
         logging.info(f"Backup {config.name}")
+        sendLog(config.webhook, f"サーバー`{config.name}`を`{config.backup}`にバックアップしました。\n次のバックアップは{config.backupTime}分後です。")
         global backuptimeCount
         backuptimeCount = 0
     except Exception as err:
         logging.error(err, exc_info=True)
+        sendLog(config.webhook, f"サーバー`{config.name}`のバックアップ中にエラーが発生しました。\n詳しくはログを確認してください。")
 
 
 def checkLatestVersion():
@@ -109,12 +110,22 @@ def checkLatestVersion():
         return str(re.search(u"https://minecraft.azureedge.net/bin-win/bedrock-server-[0-9.-]+.zip", response.text).group().replace("https://minecraft.azureedge.net/bin-win/bedrock-server-", "").replace(".zip", ""))
     except Exception as err:
         logging.error(err, exc_info=True)
+        return err
 
 
 async def update(config: BSM_Config):
+    VERSION = "[未取得]"
+    CURRENT = "[未取得]"
     try:
         DIR = config.location
-        url = f"https://minecraft.azureedge.net/bin-win/bedrock-server-{checkLatestVersion()}.zip"
+        VERSION = checkLatestVersion()
+        CURRENT = open(os.path.join(config.location, "version.txt"), encoding="utf-8").readlines()[0].strip()
+        if CURRENT == VERSION:
+            sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: アップデートの必要はありません。\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
+            return
+        else:
+            sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: アップデートの必要があります。アップデートを開始します...\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
+        url = f"https://minecraft.azureedge.net/bin-win/bedrock-server-{VERSION}.zip"
         if (isinstance(url, Exception)):
             return False
 
@@ -178,10 +189,12 @@ async def update(config: BSM_Config):
             os.path.join(BASE_DIR, "\\tmp")
         )
         logging.info(f"Update {config.name}")
+        sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: アップデートを完了させました。\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
         global updatetimeCount
         updatetimeCount = 0
     except Exception as err:
         logging.error(err, exc_info=True)
+        sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: エラーにより中断されました。\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
 
 
 async def main():
