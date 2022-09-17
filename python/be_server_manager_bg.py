@@ -41,7 +41,7 @@ def sendLog(URL: str | None, content: str):
         response = requests.post(
             URL, json.dumps(send_content), headers=HEADERS
         )
-        logging.info(URL, response, response.json["content"])
+        logging.info(URL, response)
     else:
         logging.info("ログURLが指定されていないため、ログは送信されませんでした。")
 
@@ -129,9 +129,9 @@ async def update(config: BSM_Config):
         if (isinstance(url, Exception)):
             return False
 
-        async def fetch(session, url):
+        async def fetch(session: aiohttp.ClientSession, url):
             async with session.get(url) as response:
-                return await response.content
+                return response.content
 
         async with aiohttp.ClientSession() as session:
             UpdateData = await fetch(session, url)
@@ -142,51 +142,56 @@ async def update(config: BSM_Config):
         with open(os.path.join(BASE_DIR, f"\\tmp\\{url.split('/')[-1]}"), mode='wb') as f:
             f.write(UpdateData)
 
-        shutil.copy(
-            os.path.join(DIR, "\\permissions.json"),
-            os.path.join(BASE_DIR, "\\tmp\\permissions.json")
+        def copy(origin: str, reback: bool = False, folder: bool = False) -> None:
+            if not folder:
+                if not reback:
+                    if os.path.exists(os.path.join(DIR, origin)):
+                        shutil.copy(
+                            os.path.join(DIR, origin),
+                            os.path.join(BASE_DIR, f"tmp\\{origin}")
+                        )
+                else:
+                    if os.path.exists(os.path.join(BASE_DIR, f"tmp\\{origin}")):
+                        shutil.copy(
+                            os.path.join(BASE_DIR, f"tmp\\{origin}"),
+                            os.path.join(DIR, origin)
+                        )
+            else:
+                if not reback:
+                    if os.path.exists(os.path.join(DIR, origin)):
+                        shutil.copytree(
+                            os.path.join(DIR, origin),
+                            os.path.join(BASE_DIR, f"tmp\\{origin}")
+                        )
+                else:
+                    if os.path.exists(os.path.join(BASE_DIR, f"tmp\\{origin}")):
+                        shutil.copytree(
+                            os.path.join(BASE_DIR, f"tmp\\{origin}"),
+                            os.path.join(DIR, origin)
+                        )
+
+
+        shutil.rmtree(
+            os.path.join(BASE_DIR, "tmp")
         )
-        shutil.copy(
-            os.path.join(DIR, "\\server.properties"),
-            os.path.join(BASE_DIR, "\\tmp\\server.properties")
-        )
-        shutil.copy(
-            os.path.join(DIR, "\\allowlist.json"),
-            os.path.join(BASE_DIR, "\\tmp\\allowlist.json")
-        )
-        shutil.copy(
-            os.path.join(DIR, "\\whitelist.json"),
-            os.path.join(BASE_DIR, "\\tmp\\whitelist.json")
-        )
-        shutil.copytree(
-            os.path.join(DIR, "\\worlds"),
-            os.path.join(BASE_DIR, "\\tmp\\worlds")
-        )
+        copy("permissions.json")
+        copy("server.properties")
+        copy("allowlist.json")
+        copy("whitelist.json")
+        copy("worlds", folder=True)
         shutil.rmtree(DIR)
         shutil.unpack_archive(os.path.join(
-            BASE_DIR, f"\\tmp\\{url.split('/')[-1]}"), os.path.join(DIR))
-        shutil.copy(
-            os.path.join(BASE_DIR, "\\tmp\\permissions.json"),
-            os.path.join(DIR, "\\permissions.json")
+            BASE_DIR,
+            f"tmp\\{url.split('/')[-1]}"),
+            os.path.join(DIR)
         )
-        shutil.copy(
-            os.path.join(BASE_DIR, "\\tmp\\server.properties"),
-            os.path.join(DIR, "\\server.properties")
-        )
-        shutil.copy(
-            os.path.join(BASE_DIR, "\\tmp\\allowlist.json"),
-            os.path.join(DIR, "\\allowlist.json")
-        )
-        shutil.copy(
-            os.path.join(BASE_DIR, "\\tmp\\whitelist.json"),
-            os.path.join(DIR, "\\whitelist.json")
-        )
-        shutil.copytree(
-            os.path.join(BASE_DIR, "\\tmp\\worlds"),
-            os.path.join(DIR, "\\worlds")
-        )
+        copy("permissions.json", reback=True)
+        copy("server.properties", reback=True)
+        copy("allowlist.json", reback=True)
+        copy("whitelist.json", reback=True)
+        copy("worlds", reback=True, folder=True)
         shutil.rmtree(
-            os.path.join(BASE_DIR, "\\tmp")
+            os.path.join(BASE_DIR, "tmp")
         )
         logging.info(f"Update {config.name}")
         sendLog(config.webhook, f"サーバー`{config.name}`のアップデート結果: アップデートを完了させました。\n現在バージョン: `v{CURRENT}`\n最新バージョン: `v{VERSION}`")
