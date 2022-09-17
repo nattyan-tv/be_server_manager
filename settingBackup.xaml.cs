@@ -105,6 +105,7 @@ namespace bedrock_server_manager
                 backupButton.IsEnabled = false;
             }
 
+            setted = true;
         }
 
         private void saveSettings(object sender, RoutedEventArgs e)
