@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using System.IO;
 using Newtonsoft.Json;
 using System.Globalization;
+using static bedrock_server_manager.BaseConfig;
 
 namespace bedrock_server_manager
 {
@@ -28,23 +29,9 @@ namespace bedrock_server_manager
     {
         public bool setted = false;
 
-        public class ConfigData
-        {
-            public string name { get; set; }
-            public string location { get; set; }
-            public string seed { get; set; }
-            public string update { get; set; }
-            public string backup { get; set; }
-            public string backupTime { get; set; }
-            public bool autoupdate { get; set; }
-            public bool autobackup { get; set; }
-            public string botToken { get; set; }
-            public string botPrefix { get; set; }
-        }
-
         private void textBoxTime_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !new Regex("[0-9:]").IsMatch(e.Text);
+            e.Handled = !new Regex("[0-9]").IsMatch(e.Text);
         }
         private void textBoxTime_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
@@ -80,21 +67,9 @@ namespace bedrock_server_manager
 
         private void saveAndStart(object sender, RoutedEventArgs e)
         {
-            DateTime dt;
-
-            if (updateTime.Text.Length == 4)
-            {
-                updateTime.Text = "0" + updateTime.Text;
-            }
-
-            if (!DateTime.TryParseExact(updateTime.Text, "HH:mm", null, DateTimeStyles.AssumeLocal, out dt))
-            {
-                MessageBox.Show("バックアップの時間指定が異常です。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
             backupTime.Text = backupTime.Text.Replace(":", "");
 
-            ConfigData cfgDATA = new ConfigData
+            BaseConfig cfgDATA = new BaseConfig
             {
                 name = server_name.Text,
                 location = serverLocation.Text,

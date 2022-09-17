@@ -9,28 +9,15 @@ import shutil
 import traceback
 import pip
 
-try:
-    import aiohttp
-    import requests
-    from mcstatus import MinecraftBedrockServer as mcb
-    import psutil
-    import discord
-    from discord.ext import commands
-    print("モジュールインポート完了")
-except Exception as err:
-    try:
-        print(f"Install modules...", file=sys.stderr)
-        pip.main(['install', '-r', f'{os.getcwd()}/python/requirements.txt'])
-        import aiohttp
-        import requests
-        from mcstatus import MinecraftBedrockServer as mcb
-        import psutil
-        import discord
-        from discord.ext import commands
-        print("モジュールインポート完了")
-    except Exception as err:
-        print(f"An error has occurred.\n{err}\n\n開発者にお問い合わせください。")
-        os._exit(1)
+
+import aiohttp
+import requests
+from mcstatus import BedrockServer as mcb
+import psutil
+import discord
+from discord.ext import commands
+print("モジュールインポート完了")
+
 
 
 # LATEST_URL = "https://minecraft.azureedge.net/bin-win/bedrock-server-XXXXX.zip"
@@ -50,7 +37,12 @@ def stopServer():
     """Stop server"""
     for p in psutil.process_iter(attrs=('name', 'pid', 'cmdline')):
         if p.info["name"] == "bedrock_server.exe":
-            p.terminate()
+            location = os.path.normpath(p.info["cmdline"][0])
+            if location == os.path.normpath(f"{DIR}\\bedrock_server.exe"):
+                p.terminate()
+                return True
+            else:
+                return False
 
 
 def startServer():
@@ -186,8 +178,8 @@ intents.members = True
 bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
 
 address = "localhost"
-ipv4 = serverSetting["server_port"]
-ipv6 = serverSetting["server_portv6"]
+ipv4 = serverSetting["server-port"]
+ipv6 = serverSetting["server-portv6"]
 
 
 @bot.event
@@ -203,14 +195,12 @@ Latest:[{checkLatestVersion()}]
 NeedUpdate:[{checkCurrentVersion() != checkLatestVersion()}]""")
     print("\n#################################################\n")
     print('このコンソールを閉じると、DiscordBOTは終了します。')
-    print("\n#################################################")
+    print("\n#################################################\n")
 
 
 @bot.event
 async def on_command_error(ctx: commands.Context, event: Exception):
-    if isinstance(event, discord.ext.commands.ArgumentParsingError):
-        await ctx.send(embed=discord.Embed(title="Error: ArgumentParsingError", description=f"コマンドの引数指定方法がおかしいです。", color=0xFF0000))
-    elif isinstance(event, discord.ext.commands.CommandNotFound):
+    if isinstance(event, discord.ext.commands.CommandNotFound):
         await ctx.send(embed=discord.Embed(title="Error: CommandNotFound", description=f"コマンドが見つかりませんでした。\n`{PREFIX}help`をご確認ください。", color=0xFF0000))
     else:
         await ctx.send(embed=discord.Embed(title="Error", description=f"内部エラーが発生しました。\n```sh\n{str(event)}```\n```sh\n{traceback.format_exc()}```", color=0xFF0000))
@@ -226,7 +216,7 @@ async def status(ctx: commands.Context):
             status = server.status()
         except Exception as err:
             error = err
-        if status != None:
+        if status is not None:
             await ctx.reply(
                 "Status",
                 embed=discord.Embed(
@@ -276,8 +266,11 @@ async def start(ctx: commands.Context):
 @bot.command()
 async def stop(ctx: commands.Context):
     if checkLaunching():
-        stopServer()
-        await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを停止しました。", color=0x477a1e))
+        result = stopServer()
+        if result:
+            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを停止しました。", color=0x477a1e))
+        else:
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバー停止ができませんでした。", color=0xff0000))
     else:
         await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは実行されていません。", color=0xff0000))
     return
@@ -291,6 +284,7 @@ async def restart(ctx: commands.Context):
             stopServer()
             await message.edit(embed=discord.Embed(title="Wait...", description=f"サーバーを停止しました。\nサーバー起動準備を行っています...", color=0x477a1e))
             await asyncio.sleep(5)
+            await message.edit(embed=discord.Embed(title="Wait...", description=f"サーバーを起動しています...", color=0x477a1e))
             startServer()
             await message.edit(embed=discord.Embed(title="Success", description=f"サーバーを再起動しました。", color=0x477a1e))
         else:
@@ -325,8 +319,11 @@ async def update(ctx: commands.Context):
 
 
 @bot.command()
-async def whitelist(ctx: commands.Context, commandType: str, name: str):
+async def whitelist(ctx: commands.Context, commandType: str = None, name: str = None):
     if checkExist():
+        if commandType is None or name is None:
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"次の引数が足りません。\n{(lambda x: '`commandType`(`add/del`)' if x is None else '')(commandType)}\n{(lambda x: '`name`(`ユーザー名`)' if x is None else '')(name)}", color=0xff0000))
+            return
         if commandType == "add":
             whitelist = list
             if os.path.isfile(f"{DIR}/whitelist.json"):

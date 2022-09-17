@@ -13,13 +13,14 @@
 
                 <MenuItem Header="ファイル">
                     <MenuItem Header="DiscordBOTの起動" Click="launchDiscordBOT" />
-                    <MenuItem Header="設定を保存する" Click="saveConfig"/>
+                    <MenuItem Header="設定を保存する" Click="saveConfig" />
                     <MenuItem Header="終了" Click="Window_Closing" />
                 </MenuItem>
 
                 <MenuItem Header="各種設定">
                     <MenuItem Header="バックアップ設定" Click="openConfigBackup"/>
                     <MenuItem Header="アップデート設定" Click="openConfigUpdate" />
+                    <MenuItem Header="Webhook設定" Click="openConfigWebhook" />
                     <MenuItem Header="DiscordBOT設定" Click="openConfigDiscord" />
                 </MenuItem>
 
@@ -31,7 +32,7 @@
         </Grid>
         <Grid Height="118" VerticalAlignment="Top" Background="#FFF3FFF5" Margin="0,18,0,0">
             <Label x:Name="サーバー名" Content="サーバー名：Dedicated Server" Margin="10,10,181,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
-            <Label x:Name="最新バージョン" Content="配信中バージョン：v0.0.0" Margin="10,46,181,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
+            <Label x:Name="バージョン" Content="バージョン：999.999.999" Margin="10,46,181,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
             <Label x:Name="ファイル" Content="ファイル場所：" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
             <TextBox x:Name="serverLocation" IsReadOnly="True" Margin="118,82,181,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="/"/>
             <Button x:Name="launchButton" Content="起動" Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="159" Height="31" FontSize="16" Click="startServer" IsEnabled="False"/>
@@ -179,7 +180,7 @@
                 </Grid>
                 <Grid Grid.Column="1" Margin="10,460,9,0" Height="40" VerticalAlignment="Top">
                     <Label Content="位置ズレ検知間隔：" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="5,0,0,0"/>
-                    <TextBox x:Name="config_player_movement_duration_threshold_in_ms" Margin="156,4,46,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="位置のズレを検知する感覚です。" TextChanged="updateContent"></TextBox>
+                    <TextBox x:Name="config_player_movement_duration_threshold_in_ms" Margin="156,4,46,4" VerticalContentAlignment="Center" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="textBoxPrice_PreviewTextInput" CommandManager.PreviewExecuted="textBoxPrice_PreviewExecuted" ToolTip="位置のズレを検知する間隔です。" TextChanged="updateContent"></TextBox>
                     <Label Content="ms" VerticalAlignment="Center" FontSize="16" FontFamily="Yu Gothic UI" Margin="0,0,10,0" HorizontalAlignment="Right" Width="30"/>
                 </Grid>
                 <Grid Grid.Column="0" Margin="10,505,9,0" Height="40" VerticalAlignment="Top">

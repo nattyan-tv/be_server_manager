@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using static bedrock_server_manager.BaseConfig;
 
 namespace bedrock_server_manager
 {
@@ -25,23 +26,10 @@ namespace bedrock_server_manager
     public partial class settingBackup : Window
     {
         public bool setted = true;
-        public class ConfigData
-        {
-            public string name { get; set; }
-            public string location { get; set; }
-            public string seed { get; set; }
-            public string update { get; set; }
-            public string backup { get; set; }
-            public string backupTime { get; set; }
-            public bool autoupdate { get; set; }
-            public bool autobackup { get; set; }
-            public string botToken { get; set; }
-            public string botPrefix { get; set; }
-        }
 
         private void textBoxTime_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !new Regex("[0-9:]").IsMatch(e.Text);
+            e.Handled = !new Regex("[0-9]").IsMatch(e.Text);
         }
         private void textBoxTime_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
         {
@@ -94,11 +82,11 @@ namespace bedrock_server_manager
             InitializeComponent();
             /// jsonファイルから設定を読み込んで、Textとかに埋め込む。
             /// その際、nullだったらなにも入れないみたいな...
-            ConfigData cfgDATA = null;
+            BaseConfig cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
             }
             if (cfgDATA.backup != null)
             {
@@ -122,13 +110,13 @@ namespace bedrock_server_manager
         private void saveSettings(object sender, RoutedEventArgs e)
         {
             backupTime.Text = backupTime.Text.Replace(":", "");
-            ConfigData BASEcfgDATA = null;
+            BaseConfig BASEcfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                BASEcfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                BASEcfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
             }
-            ConfigData cfgDATA = new ConfigData
+            BaseConfig cfgDATA = new BaseConfig
             {
                 name = BASEcfgDATA.name,
                 location = @BASEcfgDATA.location,
@@ -199,11 +187,11 @@ namespace bedrock_server_manager
                 MessageBox.Show("バックアップを保存する場所が指定されていません。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
-            ConfigData cfgDATA = null;
+            BaseConfig cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
             }
             DateTime dt = DateTime.Now;
             try

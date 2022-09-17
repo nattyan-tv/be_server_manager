@@ -26,6 +26,7 @@ using System.Runtime.Serialization.Json;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading;
+using static bedrock_server_manager.BaseConfig;
 
 /// 
 /// BE Server Manager
@@ -59,28 +60,17 @@ namespace bedrock_server_manager
         public string currentVersion = "";
         public string latestVersion = "";
 
-        public class ConfigData
-        {
-            public string name { get; set; }
-            public string location { get; set; }
-            public string seed { get; set; }
-            public string update { get; set; }
-            public string backup { get; set; }
-            public string backupTime { get; set; }
-            public bool autoupdate { get; set; }
-            public bool autobackup { get; set; }
-            public string botToken { get; set; }
-            public string botPrefix { get; set; }
-        }
+        public string PythonExe = @AppDomain.CurrentDomain.BaseDirectory + @"\python3\python.exe";
+
 
         private void BackupServerForeground(){
             try
             {
-                ConfigData cfgDATA = null;
+                BaseConfig cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
                 }
                 if(!Directory.Exists(@cfgDATA.backup))
                 {
@@ -102,11 +92,11 @@ namespace bedrock_server_manager
         private void BackupServerBackground(){
             try
             {
-                ConfigData cfgDATA = null;
+                BaseConfig cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
                 }
                 if(!Directory.Exists(@cfgDATA.backup))
                 {
@@ -182,11 +172,11 @@ namespace bedrock_server_manager
             /// Copy private files to cache.
             await Task.Run(() =>
             {
-                ConfigData cfgDATA = null;
+                BaseConfig cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
                 }
 
                 if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false) {
@@ -209,11 +199,11 @@ namespace bedrock_server_manager
             /// Copy private files from cache.
             await Task.Run(() =>
             {
-                ConfigData cfgDATA = null;
+                BaseConfig cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
                 }
                 FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", @cfgDATA.location + @"\permissions.json", true);
                 FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", @cfgDATA.location + @"\server.properties", true);
@@ -358,7 +348,7 @@ namespace bedrock_server_manager
                     }
                 }
             }
-            all_content = all_content.Replace("\r\n", "\n").Substring(0, all_content.Length - 1);
+            all_content = all_content.Replace("\r\n", "\n");
             StreamWriter wfile = new StreamWriter(@fileLocation, false);
             wfile.WriteLine(all_content);
             wfile.Close();
@@ -371,7 +361,7 @@ namespace bedrock_server_manager
 
         public MainWindow()
         {
-
+            Console.WriteLine("Waiting initializing compotens...");
             InitializeComponent();
             Console.WriteLine("Components initialized.");
             if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
@@ -383,25 +373,46 @@ namespace bedrock_server_manager
             }
             try
             {
-                ConfigData cfgDATA = null;
+                BaseConfig cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
                 }
 
                 Console.WriteLine("Settings are loaded.");
 
                 if (!Directory.Exists(@cfgDATA.location)){ Directory.CreateDirectory(@cfgDATA.location); }
 
+                Microsoft.Win32.RegistryKey regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                Console.WriteLine(regkey.GetValue("BEServerManagerBG"));
+                if (regkey.GetValue("BEServerManagerBG") == null)
+                {
+                    regkey.SetValue("BEServerManagerBG", "\"" + @AppDomain.CurrentDomain.BaseDirectory + "\\python3\\python.exe\" \"" + @AppDomain.CurrentDomain.BaseDirectory + "\\python\\be_server_manager_bg.exe\"");
+                    regkey.Close();
+                }
+
+                var bsm_bg = new Process
+                {
+                    StartInfo = new ProcessStartInfo(PythonExe)
+                    {
+                        UseShellExecute = true,
+                        CreateNoWindow = false,
+                        Arguments = @AppDomain.CurrentDomain.BaseDirectory + @"\python\be_server_manager_bg.py",
+                    }
+                };
+                bsm_bg.Start();
+
+
                 Console.WriteLine("Start task...");
                 var dlLink = new Process
                 {
-                    StartInfo = new ProcessStartInfo("python/getLatestVersion.exe")
+                    StartInfo = new ProcessStartInfo(PythonExe)
                     {
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
-                        CreateNoWindow = true
+                        CreateNoWindow = true,
+                        Arguments = AppDomain.CurrentDomain.BaseDirectory + "/python/getLatestVersion.py"
                     }
                 };
                 dlLink.Start();
@@ -415,8 +426,6 @@ namespace bedrock_server_manager
                 string[] lb = new string[latestVersion.Split('.').Length - 1];
                 Array.Copy(latestVersion.Split('.'), 0, lb, 0, latestVersion.Split('.').Length - 1);
                 string lv = string.Join(".", lb);
-                Console.WriteLine(lv);
-                最新バージョン.Content = "配信中バージョン：" + lv;
                 if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
                 {
                     LoadServerSetting(@cfgDATA.location + @"\server.properties");
@@ -434,6 +443,7 @@ namespace bedrock_server_manager
                         }
                         Console.WriteLine("Latest Version: " + latestVersion);
                         Console.WriteLine("Current Version: " + currentVersion);
+                        バージョン.Content = "バージョン：" + currentVersion;
                         if (latestVersion == currentVersion){ Console.WriteLine("最新バージョンです。"); }
                         else{ MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
                     }
@@ -519,11 +529,11 @@ namespace bedrock_server_manager
             }
             Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\tmp");
 
-            ConfigData cfgDATA = null;
+            BaseConfig cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
             }
 
             CopyToCache();
@@ -533,11 +543,12 @@ namespace bedrock_server_manager
             Console.WriteLine("Start task...");
             var dlLink = new Process
             {
-                StartInfo = new ProcessStartInfo("python/getLatestVersion.exe")
+                StartInfo = new ProcessStartInfo(PythonExe)
                 {
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    CreateNoWindow = true
+                    CreateNoWindow = true,
+                    Arguments = "python/getLatestVersion.py"
                 }
             };
             dlLink.Start();
@@ -583,11 +594,11 @@ namespace bedrock_server_manager
                 Console.WriteLine(ans_c);
                 if (ans_c != MessageBoxResult.OK) { return; }
             }
-            ConfigData cfgDATA = null;
+            BaseConfig cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
             }
             var Minecraft = new Process
             {
@@ -607,22 +618,22 @@ namespace bedrock_server_manager
         {
             try
             {
-                ConfigData cfgDATA_bf = null;
+                BaseConfig cfgDATA_bf = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA_bf = (ConfigData)serializer.Deserialize(file, typeof(ConfigData));
+                    cfgDATA_bf = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
                 }
-                ConfigData cfgDATA = new ConfigData
+                BaseConfig cfgDATA = new BaseConfig
                 {
                     name = config_server_name.Text,
                     location = serverLocation.Text,
-                    seed = @cfgDATA_bf.seed,
+                    seed = config_level_seed.Text,
                     update = @cfgDATA_bf.update,
-                    backup = @cfgDATA_bf.Text,
-                    backupTime = @cfgDATA_bf.Text,
+                    backup = @cfgDATA_bf.backup,
+                    backupTime = @cfgDATA_bf.backupTime,
                     autoupdate = @cfgDATA_bf.autoupdate,
-                    autobackup = @cfgDATA_bf.IsChecked,
+                    autobackup = @cfgDATA_bf.autobackup,
                     botToken = @cfgDATA_bf.botToken,
                     botPrefix = @cfgDATA_bf.botPrefix
                 };
@@ -641,9 +652,9 @@ namespace bedrock_server_manager
                 MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            catch (Exception e)
+            catch (Exception err)
             {
-                MessageBox.Show("保存中にエラーが発生しました。\n\n" + e, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                MessageBox.Show("保存中にエラーが発生しました。\n\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
                 return;
             }
         }
@@ -678,66 +689,9 @@ This application is not provided by Microsoft or Mojang in any way and has been 
 
         private void launchDiscordBOT(object sender, RoutedEventArgs e)
         {
-            if (!Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\python3"))
-            {
-                MessageBoxResult installRequire = MessageBox.Show("DiscordBOTを動作させるのに必要なファイルをダウンロードします。\nダウンロード中はBE Server Managerが操作できなくなりますがよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Information);
-                if (installRequire == MessageBoxResult.OK)
-                {
-                    WebClient mywebClient = new WebClient();
-                    if (!Directory.Exists(@"tmp")) { Directory.CreateDirectory(@"tmp"); }
-                    mywebClient.DownloadFile("https://www.python.org/ftp/python/3.10.0/python-3.10.0-embed-amd64.zip", @"tmp\python3.zip");
-                    DirectoryInfo pythonDir = new DirectoryInfo(@"python3");
-                    try
-                    {
-                        Directory.CreateDirectory(@"python3");
-                        ZipFile.ExtractToDirectory(@"tmp\python3.zip", @"python3");
-                    }
-                    catch (IOException)
-                    {
-                        MessageBox.Show("ダウンロード中にエラーが発生しました。\nネットワーク環境などをご確認ください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
-                        return;
-                    }
-                    string pipUrl = "https://bootstrap.pypa.io/get-pip.py";
-                    string pthContent = @"python310.zip
-.
-
-# Uncomment to run site.main() automatically
-import site";
-                    File.WriteAllText(@"python3\python310._pth", pthContent);
-                    mywebClient.DownloadFile(pipUrl, @"tmp\get-pip.py");
-                    Console.WriteLine(File.Exists(@"python3\python.exe"));
-                    var get_pip = new Process
-                    {
-                        StartInfo = new ProcessStartInfo(@"python3\python.exe")
-                        {
-                            Arguments = "tmp/get-pip.py",
-                            UseShellExecute = true,
-                            RedirectStandardOutput = false,
-                            CreateNoWindow = false
-                        }
-                    };
-                    get_pip.Start();
-                    get_pip.WaitForExit();
-                    var install_requirements = new Process
-                    {
-                        StartInfo = new ProcessStartInfo(@"python3\python.exe")
-                        {
-                            Arguments = "-m pip install -u python\requirements.txt",
-                            UseShellExecute = true,
-                            RedirectStandardOutput = false,
-                            CreateNoWindow = false
-                        }
-                    };
-                    install_requirements.Start();
-                    install_requirements.WaitForExit();
-                    MessageBox.Show("各種モジュールをインストールしました。\n再度「DiscordBOTの起動」を選択してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-                return;
-            }
             var DiscordBOT = new Process
             {
-                StartInfo = new ProcessStartInfo(@"python3\python.exe")
+                StartInfo = new ProcessStartInfo(PythonExe)
                 {
                     Arguments = "python/DiscordBot.py",
                     UseShellExecute = true,
@@ -746,6 +700,12 @@ import site";
                 }
             };
             DiscordBOT.Start();
+        }
+
+        private void openConfigWebhook(object sender, RoutedEventArgs e)
+        {
+            settingWebhook window = new settingWebhook();
+            window.ShowDialog();
         }
     }
 }

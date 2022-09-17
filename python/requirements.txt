@@ -3,3 +3,6 @@ mcstatus
 psutil
 nextcord
 requests
+
+schedule
+tendo
