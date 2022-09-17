@@ -91,6 +91,7 @@ namespace bedrock_server_manager
             if (cfgDATA.backup != null)
             {
                 serverBackup.Text = @cfgDATA.backup;
+                backupTime.Text = cfgDATA.backupTime;
             }
             if (cfgDATA.autobackup)
             {
