@@ -321,10 +321,10 @@ async def restart(ctx: commands.Context):
 
 @bot.command()
 async def update(ctx: commands.Context, update_type: str = None):
+    await ctx.reply(embed=discord.Embed(title="Service Temporarily Unavailable", description=f"BOTからの手動アップデート操作は現在実装準備中です。", color=0xff0000))
+    return
     if check(ctx.author.id):
         if update_type is None:
-            await ctx.reply(embed=discord.Embed(title="Service Temporarily Unavailable", description=f"BOTからの手動アップデート操作は現在テスト段階です。\n確実に動作しませんが、`{PREFIX}update force`でアップデート操作を行うことが出来ます。"))
-            return
             if checkExist():
                 if checkLatestVersion() != checkCurrentVersion():
                     if checkLaunching():
@@ -414,8 +414,8 @@ async def help(ctx: commands.Context):
 `{PREFIX}start`: サーバーを起動します。
 `{PREFIX}stop`: サーバーを停止します。
 `{PREFIX}restart`: サーバーを再起動します。
-`{PREFIX}update`: サーバーを更新します。
-`{PREFIX}update force`: サーバーを強制更新します。
+~~`{PREFIX}update`: サーバーを更新します。~~
+~~`{PREFIX}update force`: サーバーを強制更新します。~~
 `{PREFIX}whitelist [add/del] [ユーザー名]`: サーバーのホワイトリストの設定を行います。
 ~~`{PREFIX}backup`: サーバーのバックアップを作成します。~~
 `{PREFIX}reload`: 設定ファイルなどの変更をDiscordBOTに適応させます。
