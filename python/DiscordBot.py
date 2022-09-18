@@ -95,6 +95,18 @@ def checkCurrentVersion():
     return str(ver)
 
 
+## def backup():
+##     try:
+##         shutil.make_archive(os.path.join(config.backup, datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')), format="zip", root_dir=config.location)
+##         logging.info(f"Backup {config.name}")
+##         sendLog(config.webhook, f"サーバー`{config.name}`を`{config.backup}`にバックアップしました。\n次のバックアップは{config.backupTime}分後です。")
+##         global backuptimeCount
+##         backuptimeCount = 1
+##     except Exception as err:
+##         logging.error(err, exc_info=True)
+##         sendLog(config.webhook, f"サーバー`{config.name}`のバックアップ中にエラーが発生しました。\n詳しくはログを確認してください。")
+
+
 async def updateServer():
     """Update server"""
     try:
@@ -165,7 +177,8 @@ async def updateServer():
         return err
 
 
-setting = json.load(open("setting.json"))
+setting = json.load(open("setting.json"))[0]
+dissetting = json.load(open("discord.json"))
 PREFIX, DIR, TOKEN, NAME = setting["botPrefix"], setting["location"], setting["botToken"], setting["name"]
 serverSetting = {}
 
@@ -180,6 +193,12 @@ bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
 address = "localhost"
 ipv4 = serverSetting["server-port"]
 ipv6 = serverSetting["server-portv6"]
+
+def check(userid: int) -> bool:
+    if str(userid) in dissetting["bot_admins"]:
+        return True
+    else:
+        return False
 
 
 @bot.event
@@ -252,122 +271,138 @@ Version:`{status.version.version}`
 
 @bot.command()
 async def start(ctx: commands.Context):
-    if checkExist():
-        if checkLaunching():
-            await ctx.reply(embed=discord.Embed(title="Error", description=f"既にサーバーは実行されています。", color=0xff0000))
+    if check(ctx.author.id):
+        if checkExist():
+            if checkLaunching():
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"既にサーバーは実行されています。", color=0xff0000))
+            else:
+                startServer()
+                await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを開始しました。", color=0x477a1e))
         else:
-            startServer()
-            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを開始しました。", color=0x477a1e))
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
     else:
-        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
-    return
+        await ctx.reply(embed=discord.Embed(title="Forbidden", description="あなたはこのコマンドを実行できません。\nMinecraftサーバーの管理者にお問い合わせください。", color=0xff0000))
 
 
 @bot.command()
 async def stop(ctx: commands.Context):
-    if checkLaunching():
-        result = stopServer()
-        if result:
-            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを停止しました。", color=0x477a1e))
+    if check(ctx.author.id):
+        if checkLaunching():
+            result = stopServer()
+            if result:
+                await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを停止しました。", color=0x477a1e))
+            else:
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバー停止ができませんでした。", color=0xff0000))
         else:
-            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバー停止ができませんでした。", color=0xff0000))
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは実行されていません。", color=0xff0000))
     else:
-        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは実行されていません。", color=0xff0000))
-    return
+        await ctx.reply(embed=discord.Embed(title="Forbidden", description="あなたはこのコマンドを実行できません。\nMinecraftサーバーの管理者にお問い合わせください。", color=0xff0000))
 
 
 @bot.command()
 async def restart(ctx: commands.Context):
-    if checkExist():
-        if checkLaunching():
-            message = await ctx.reply(embed=discord.Embed(title="Wait...", description=f"サーバーを停止しています...", color=0x477a1e))
-            stopServer()
-            await message.edit(embed=discord.Embed(title="Wait...", description=f"サーバーを停止しました。\nサーバー起動準備を行っています...", color=0x477a1e))
-            await asyncio.sleep(5)
-            await message.edit(embed=discord.Embed(title="Wait...", description=f"サーバーを起動しています...", color=0x477a1e))
-            startServer()
-            await message.edit(embed=discord.Embed(title="Success", description=f"サーバーを再起動しました。", color=0x477a1e))
-        else:
-            await ctx.reply(embed=discord.Embed(title="Attention", description=f"サーバーが実行されていませんでした。\n`{PREFIX}start`でサーバーを実行することができます。", color=0x477a1e))
-    else:
-        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
-    return
-
-
-@bot.command()
-async def update(ctx: commands.Context):
-    args = ctx.message.content.split(" ")
-    if len(args) == 1:
+    if check(ctx.author.id):
         if checkExist():
-            if checkLatestVersion() != checkCurrentVersion():
-                if checkLaunching():
-                    await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーが実行されているためアップデート出来ません。\n強制的にアップデートするには`{PREFIX}update force`と送信してください。", color=0xff0000))
-                else:
-                    updateServer()
-                    await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを更新しました。\nバージョン:`{checkLatestVersion()}`", color=0x477a1e))
+            if checkLaunching():
+                message = await ctx.reply(embed=discord.Embed(title="Wait...", description=f"サーバーを停止しています...", color=0x477a1e))
+                stopServer()
+                await message.edit(embed=discord.Embed(title="Wait...", description=f"サーバーを停止しました。\nサーバー起動準備を行っています...", color=0x477a1e))
+                await asyncio.sleep(5)
+                await message.edit(embed=discord.Embed(title="Wait...", description=f"サーバーを起動しています...", color=0x477a1e))
+                startServer()
+                await message.edit(embed=discord.Embed(title="Success", description=f"サーバーを再起動しました。", color=0x477a1e))
             else:
-                await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは最新のバージョンです。\n強制的にアップデートするには`{PREFIX}update force`と送信してください。", color=0xff0000))
+                await ctx.reply(embed=discord.Embed(title="Attention", description=f"サーバーが実行されていませんでした。\n`{PREFIX}start`でサーバーを実行することができます。", color=0x477a1e))
         else:
             await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
-    elif args[1] == "force":
-        if checkExist():
-            updateServer()
-            await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを強制更新しました。\nバージョン:`{checkLatestVersion()}`", color=0x477a1e))
-        else:
-            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
-    return
+    else:
+        await ctx.reply(embed=discord.Embed(title="Forbidden", description="あなたはこのコマンドを実行できません。\nMinecraftサーバーの管理者にお問い合わせください。", color=0xff0000))
 
 
 @bot.command()
-async def whitelist(ctx: commands.Context, commandType: str = None, name: str = None):
-    if checkExist():
-        if commandType is None or name is None:
-            await ctx.reply(embed=discord.Embed(title="Error", description=f"次の引数が足りません。\n{(lambda x: '`commandType`(`add/del`)' if x is None else '')(commandType)}\n{(lambda x: '`name`(`ユーザー名`)' if x is None else '')(name)}", color=0xff0000))
+async def update(ctx: commands.Context, update_type: str = None):
+    if check(ctx.author.id):
+        if update_type is None:
+            await ctx.reply(embed=discord.Embed(title="Service Temporarily Unavailable", description=f"BOTからの手動アップデート操作は現在テスト段階です。\n確実に動作しませんが、`{PREFIX}update force`でアップデート操作を行うことが出来ます。"))
             return
-        if commandType == "add":
-            whitelist = list
-            if os.path.isfile(f"{DIR}/whitelist.json"):
-                whitelist = json.load(open(f"{DIR}\\whitelist.json"))
+            if checkExist():
+                if checkLatestVersion() != checkCurrentVersion():
+                    if checkLaunching():
+                        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーが実行されているためアップデート出来ません。\n強制的にアップデートするには`{PREFIX}update force`と送信してください。", color=0xff0000))
+                    else:
+                        updateServer()
+                        await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを更新しました。\nバージョン:`{checkLatestVersion()}`", color=0x477a1e))
+                else:
+                    await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーは最新のバージョンです。\n強制的にアップデートするには`{PREFIX}update force`と送信してください。", color=0xff0000))
             else:
-                whitelist = []
-            whitelist.append({"ignoresPlayerLimit": False, "name": name})
-            json.dump(whitelist, open(f"{DIR}\\whitelist.json", "w"), indent=4)
-            await ctx.reply(embed=discord.Embed(title="Success", description=f"`{name}`をホワイトリストに追加しました。", color=0x477a1e))
-        elif commandType == "del":
-            whitelist = list
-            if os.path.isfile(f"{DIR}/whitelist.json"):
-                whitelist = json.load(open(f"{DIR}\\whitelist.json"))
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
+        elif update_type == "force":
+            if checkExist():
+                updateServer()
+                await ctx.reply(embed=discord.Embed(title="Success", description=f"サーバーを強制更新しました。\nバージョン:`{checkLatestVersion()}`", color=0x477a1e))
             else:
-                await ctx.reply(embed=discord.Embed(title="Error", description=f"ホワイトリストが存在しません。", color=0xff0000))
-                return
-            for i in whitelist:
-                if i["name"] == name:
-                    whitelist.remove(i)
-                    json.dump(whitelist, open(
-                        f"{DIR}\\whitelist.json", "w"), indent=4)
-                    await ctx.reply(embed=discord.Embed(title="Success", description=f"`{name}`をホワイトリストから削除しました。", color=0x477a1e))
-                    return
-            await ctx.reply(embed=discord.Embed(title="Error", description=f"`{name}`はホワイトリストに存在しません。", color=0xff0000))
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
         else:
-            await ctx.reply(embed=discord.Embed(title="Error", description=f"`{commandType}`は存在しないコマンド種類です。\n`{PREFIX}whitelist [add/del] [ユーザー名]`", color=0xff0000))
-        return
+            await ctx.reply(embed=discord.Embed(title="Error", description="コマンドに渡された引数が異常です。", color=0xff0000))
     else:
-        await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
-    return
+        await ctx.reply(embed=discord.Embed(title="Forbidden", description="あなたはこのコマンドを実行できません。\nMinecraftサーバーの管理者にお問い合わせください。", color=0xff0000))
+
+
+@bot.command()
+async def whitelist(ctx: commands.Context, command_type: str = None, name: str = None):
+    if check(ctx.author.id):
+        if checkExist():
+            if command_type is None or name is None:
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"次の引数が足りません。\n{(lambda x: '`commandType`(`add/del`)' if x is None else '')(command_type)}\n{(lambda x: '`name`(`ユーザー名`)' if x is None else '')(name)}", color=0xff0000))
+                return
+            if command_type == "add":
+                whitelist = []
+                if os.path.isfile(f"{DIR}/whitelist.json"):
+                    whitelist = json.load(open(f"{DIR}\\whitelist.json"))
+                else:
+                    whitelist = []
+                whitelist.append({"ignoresPlayerLimit": False, "name": name})
+                json.dump(whitelist, open(f"{DIR}\\whitelist.json", "w"), indent=4)
+                await ctx.reply(embed=discord.Embed(title="Success", description=f"`{name}`をホワイトリストに追加しました。", color=0x477a1e))
+            elif command_type == "del":
+                whitelist = []
+                if os.path.isfile(f"{DIR}/whitelist.json"):
+                    whitelist = json.load(open(f"{DIR}\\whitelist.json"))
+                else:
+                    await ctx.reply(embed=discord.Embed(title="Error", description=f"ホワイトリストが存在しません。", color=0xff0000))
+                    return
+                for i in whitelist:
+                    if i["name"] == name:
+                        whitelist.remove(i)
+                        json.dump(whitelist, open(
+                            f"{DIR}\\whitelist.json", "w"), indent=4)
+                        await ctx.reply(embed=discord.Embed(title="Success", description=f"`{name}`をホワイトリストから削除しました。", color=0x477a1e))
+                        return
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"`{name}`はホワイトリストに存在しません。", color=0xff0000))
+            else:
+                await ctx.reply(embed=discord.Embed(title="Error", description=f"`{command_type}`は存在しないコマンド種類です。\n`{PREFIX}whitelist [add/del] [ユーザー名]`", color=0xff0000))
+        else:
+            await ctx.reply(embed=discord.Embed(title="Error", description=f"サーバーがインストールされていません。", color=0xff0000))
+    else:
+        await ctx.reply(embed=discord.Embed(title="Forbidden", description="あなたはこのコマンドを実行できません。\nMinecraftサーバーの管理者にお問い合わせください。", color=0xff0000))
 
 
 @bot.command()
 async def backup(ctx: commands.Context):
-    return
-
+    await ctx.reply(embed=discord.Embed(title="Service Temporarily Unavailable", description="BOTからの手動バックアップ操作は現在実装準備中です。", color=0xff0000))
 
 @bot.command()
 async def reload(ctx: commands.Context):
-    setting = json.load(open("setting.json"))
-    global PREFIX, DIR, TOKEN, NAME
-    PREFIX, DIR, TOKEN, NAME = setting["botPrefix"], setting["location"], setting["botToken"], setting["name"]
-    loadSetting()
-    await ctx.reply(embed=discord.Embed(title="Success", description=f"設定を再読み込みしました。", color=0x477a1e))
+    if check(ctx.author.id):
+        global dissetting, setting
+        setting = json.load(open("setting.json"))[0]
+        dissetting = json.load(open("discord.json"))
+        global PREFIX, DIR, TOKEN, NAME
+        PREFIX, DIR, TOKEN, NAME = setting["botPrefix"], setting["location"], setting["botToken"], setting["name"]
+        loadSetting()
+        await ctx.reply(embed=discord.Embed(title="Success", description=f"設定を再読み込みしました。", color=0x477a1e))
+    else:
+        await ctx.reply(embed=discord.Embed(title="Forbidden", description="あなたはこのコマンドを実行できません。\nMinecraftサーバーの管理者にお問い合わせください。", color=0xff0000))
 
 
 @bot.command()
@@ -382,7 +417,7 @@ async def help(ctx: commands.Context):
 `{PREFIX}update`: サーバーを更新します。
 `{PREFIX}update force`: サーバーを強制更新します。
 `{PREFIX}whitelist [add/del] [ユーザー名]`: サーバーのホワイトリストの設定を行います。
-`{PREFIX}backup`: サーバーのバックアップを作成します。
+~~`{PREFIX}backup`: サーバーのバックアップを作成します。~~
 `{PREFIX}reload`: 設定ファイルなどの変更をDiscordBOTに適応させます。
 `{PREFIX}help`: このヘルプを表示します。""",
             color=0x477a1e

@@ -3,6 +3,10 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace bedrock_server_manager
 {
@@ -54,6 +58,18 @@ namespace bedrock_server_manager
                 Console.WriteLine(ans_c);
                 if (ans_c != MessageBoxResult.OK) { e.Cancel = true; }
             }
+        }
+
+        private void testWebhook(object sender, RoutedEventArgs e)
+        {
+            HttpClient httpClient = new HttpClient();
+            Dictionary<string, string> strs = new Dictionary<string, string>()
+            {
+                { "content", "BE Server Managerからのテストメッセージです。\nこのようなメッセージが送信されます。" },
+            };
+            TaskAwaiter<HttpResponseMessage> awaiter = httpClient.PostAsync(webhookUrl.Text.Replace("\r", "").Replace("\n", ""), new
+            FormUrlEncodedContent(strs)).GetAwaiter();
+            awaiter.GetResult();
         }
     }
 }

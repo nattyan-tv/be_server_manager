@@ -34,9 +34,7 @@ HEADERS = {'Content-Type': 'application/json'}
 def sendLog(URL: str | None, content: str):
     if URL is not None:
         send_content = {
-            "content": content,
-            "username": "Bedrock Server Manager",
-            "avatar_url": "https://static.wikia.nocookie.net/minecraft_ja_gamepedia/images/a/a9/Birch_Forest_Grass_Block.png"
+            "content": content
         }
         response = requests.post(
             URL, json.dumps(send_content), headers=HEADERS
@@ -75,7 +73,7 @@ def timing():
 def loadConfig() -> BSM_Config:
     print(f"update: {updatetimeCount} - backup: {backuptimeCount}")
     try:
-        setting = json.load(open("setting.json"))
+        setting = json.load(open("setting.json"))[0]
         if os.path.exists(os.path.join(BASE_DIR, "webhook.txt")):
             webhook = open(os.path.join(BASE_DIR, "webhook.txt"), encoding="utf-8").readlines()[0].strip()
         else:

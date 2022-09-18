@@ -5,14 +5,29 @@ VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bedrock_server_manager", "bedrock_server_manager.csproj", "{17C6DB81-81D0-4639-B145-93CF5DD565F2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{8D370D51-BD46-462D-A85C-CCFB059156EF}"
+	ProjectSection(SolutionItems) = preProject
+		python\be_server_manager_bg.py = python\be_server_manager_bg.py
+		python\DiscordBot.py = python\DiscordBot.py
+		python\getLatestVersion.py = python\getLatestVersion.py
+		python\requirements.txt = python\requirements.txt
+		python\StatusChecker.py = python\StatusChecker.py
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		be-server-manager|Any CPU = be-server-manager|Any CPU
+		be-server-manager|x64 = be-server-manager|x64
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.be-server-manager|Any CPU.ActiveCfg = be-server-manager|Any CPU
+		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.be-server-manager|Any CPU.Build.0 = be-server-manager|Any CPU
+		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.be-server-manager|x64.ActiveCfg = be-server-manager|x64
+		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.be-server-manager|x64.Build.0 = be-server-manager|x64
 		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17C6DB81-81D0-4639-B145-93CF5DD565F2}.Debug|x64.ActiveCfg = Debug|x64

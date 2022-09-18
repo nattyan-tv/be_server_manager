@@ -1,32 +1,18 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.IO;
-using System.IO.Compression;
-using Newtonsoft.Json;
-using System.Net;
-using System.Net.Http;
-using System.Diagnostics;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.ServiceModel;
-using System.ServiceModel.Web;
-using System.Threading;
-using static bedrock_server_manager.BaseConfig;
 
 /// 
 /// BE Server Manager
@@ -43,7 +29,7 @@ namespace bedrock_server_manager
     /// MainWindow.xaml の相互作用ロジック
     /// </summary>
     /// 
-    
+
     public partial class MainWindow : Window
     {
         /// ダウンロードページ: https://www.minecraft.net/en-us/download/server/bedrock
@@ -63,56 +49,58 @@ namespace bedrock_server_manager
         public string PythonExe = @AppDomain.CurrentDomain.BaseDirectory + @"\python3\python.exe";
 
 
-        private void BackupServerForeground(){
+        private void BackupServerForeground()
+        {
             try
             {
-                BaseConfig cfgDATA = null;
+                BaseConfig[] cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                    cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
                 }
-                if(!Directory.Exists(@cfgDATA.backup))
+                if (!Directory.Exists(@cfgDATA[0].backup))
                 {
-                    Directory.CreateDirectory(@cfgDATA.backup);
+                    Directory.CreateDirectory(@cfgDATA[0].backup);
                 }
                 DateTime dt = DateTime.Now;
-                DirectoryCopy(@cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
-                MessageBox.Show("バックアップが完了しました。\n\n・場所\n" + @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"), "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                DirectoryCopy(@cfgDATA[0].location, @cfgDATA[0].backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                MessageBox.Show("バックアップが完了しました。\n\n・場所\n" + @cfgDATA[0].backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"), "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 MessageBox.Show("バックアップ中にエラーが発生しました。\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
             }
             return;
-            
+
         }
 
-        private void BackupServerBackground(){
+        private void BackupServerBackground()
+        {
             try
             {
-                BaseConfig cfgDATA = null;
+                BaseConfig[] cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                    cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
                 }
-                if(!Directory.Exists(@cfgDATA.backup))
+                if (!Directory.Exists(@cfgDATA[0].backup))
                 {
-                    Directory.CreateDirectory(@cfgDATA.backup);
+                    Directory.CreateDirectory(@cfgDATA[0].backup);
                 }
                 DateTime dt = DateTime.Now;
-                DirectoryCopy(@cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
-                Console.WriteLine("バックアップが完了しました。\n\n・場所\n" + @cfgDATA.location, @cfgDATA.backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                DirectoryCopy(@cfgDATA[0].location, @cfgDATA[0].backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                Console.WriteLine("バックアップが完了しました。\n\n・場所\n" + @cfgDATA[0].location, @cfgDATA[0].backup + @"\" + @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
                 return;
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 Console.WriteLine("バックアップ中にエラーが発生しました。\n" + err);
             }
             return;
-            
+
         }
 
 
@@ -168,53 +156,56 @@ namespace bedrock_server_manager
             }
         }
 
-        public async static void CopyToCache(){
+        public async static void CopyToCache()
+        {
             /// Copy private files to cache.
             await Task.Run(() =>
             {
-                BaseConfig cfgDATA = null;
+                BaseConfig[] cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                    cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
                 }
 
-                if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false) {
+                if (Directory.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\temp") == false)
+                {
                     Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\temp");
                 }
-                FileCopy(@cfgDATA.location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", true);
-                FileCopy(@cfgDATA.location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", true);
-                FileCopy(@cfgDATA.location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", true);
-                FileCopy(@cfgDATA.location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", true);
-                FileCopy(@cfgDATA.location + @"\valid_known_packs.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", true);
-                DirectoryCopy(@cfgDATA.location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds");
-                DirectoryCopy(@cfgDATA.location + @"\world_templates", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates");
-                DirectoryCopy(@cfgDATA.location + @"\development_behavior_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs");
-                DirectoryCopy(@cfgDATA.location + @"\development_resource_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs");
-                DirectoryCopy(@cfgDATA.location + @"\development_skin_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs");
+                FileCopy(@cfgDATA[0].location + @"\permissions.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", true);
+                FileCopy(@cfgDATA[0].location + @"\server.properties", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", true);
+                FileCopy(@cfgDATA[0].location + @"\allowlist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", true);
+                FileCopy(@cfgDATA[0].location + @"\whitelist.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", true);
+                FileCopy(@cfgDATA[0].location + @"\valid_known_packs.json", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", true);
+                DirectoryCopy(@cfgDATA[0].location + @"\worlds", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds");
+                DirectoryCopy(@cfgDATA[0].location + @"\world_templates", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates");
+                DirectoryCopy(@cfgDATA[0].location + @"\development_behavior_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs");
+                DirectoryCopy(@cfgDATA[0].location + @"\development_resource_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs");
+                DirectoryCopy(@cfgDATA[0].location + @"\development_skin_packs", @AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs");
             });
         }
 
-        public async static void CopyFromCache(){
+        public async static void CopyFromCache()
+        {
             /// Copy private files from cache.
             await Task.Run(() =>
             {
-                BaseConfig cfgDATA = null;
+                BaseConfig[] cfgDATA = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                    cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
                 }
-                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", @cfgDATA.location + @"\permissions.json", true);
-                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", @cfgDATA.location + @"\server.properties", true);
-                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", @cfgDATA.location + @"\allowlist.json", true);
-                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", @cfgDATA.location + @"\whitelist.json", true);
-                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", @cfgDATA.location + @"\valid_known_packs.json", true);
-                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds", @cfgDATA.location + @"\worlds");
-                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates", @cfgDATA.location + @"\world_templates");
-                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs", @cfgDATA.location + @"\development_behavior_packs");
-                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs", @cfgDATA.location + @"\development_resource_packs");
-                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs", @cfgDATA.location + @"\development_skin_packs");
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\permissions.json", @cfgDATA[0].location + @"\permissions.json", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\server.properties", @cfgDATA[0].location + @"\server.properties", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\allowlist.json", @cfgDATA[0].location + @"\allowlist.json", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\whitelist.json", @cfgDATA[0].location + @"\whitelist.json", true);
+                FileCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\valid_known_packs.json", @cfgDATA[0].location + @"\valid_known_packs.json", true);
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\worlds", @cfgDATA[0].location + @"\worlds");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\world_templates", @cfgDATA[0].location + @"\world_templates");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_behavior_packs", @cfgDATA[0].location + @"\development_behavior_packs");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_resource_packs", @cfgDATA[0].location + @"\development_resource_packs");
+                DirectoryCopy(@AppDomain.CurrentDomain.BaseDirectory + @"\temp\development_skin_packs", @cfgDATA[0].location + @"\development_skin_packs");
             });
 
         }
@@ -227,11 +218,11 @@ namespace bedrock_server_manager
         public void LoadServerSetting(string fileLocation)
         {
             /// Load setting file and place.
-            
+
             StreamReader file = new StreamReader(@fileLocation);
-            string[] content = file.ReadToEnd().Replace("\r\n","\n").Split(new[] {'\n','\r'});
+            string[] content = file.ReadToEnd().Replace("\r\n", "\n").Split(new[] { '\n', '\r' });
             file.Close();
-            foreach(string item in content)
+            foreach (string item in content)
             {
 
                 if (item.IndexOf("=") != -1 && !item.StartsWith("#"))
@@ -265,7 +256,7 @@ namespace bedrock_server_manager
         public void SaveServerSetting(string fileLocation)
         {
             /// Save file
-            
+
             var items = new List<string>(){
                 "server-name",
                 "gamemode",
@@ -354,56 +345,11 @@ namespace bedrock_server_manager
             wfile.Close();
         }
 
-
-
-        /// MainWindow Program
-        /// This program (below this comment) will execution when Program launced.
-
-        public MainWindow()
+        private void Initview(BaseConfig[] cfgDATA)
         {
-            Console.WriteLine("Waiting initializing compotens...");
-            InitializeComponent();
-            Console.WriteLine("Components initialized.");
-            if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
-            {
-                Console.WriteLine("FirstSession dialog show!");
-                firstSession firstSession = new firstSession();
-                firstSession.ShowDialog();
-                Console.WriteLine("FirstSession dialog closed.");
-            }
+            /// 画面の更新をする
             try
             {
-                BaseConfig cfgDATA = null;
-                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
-                }
-
-                Console.WriteLine("Settings are loaded.");
-
-                if (!Directory.Exists(@cfgDATA.location)){ Directory.CreateDirectory(@cfgDATA.location); }
-
-                Microsoft.Win32.RegistryKey regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-                Console.WriteLine(regkey.GetValue("BEServerManagerBG"));
-                if (regkey.GetValue("BEServerManagerBG") == null)
-                {
-                    regkey.SetValue("BEServerManagerBG", "\"" + @AppDomain.CurrentDomain.BaseDirectory + "\\python3\\python.exe\" \"" + @AppDomain.CurrentDomain.BaseDirectory + "\\python\\be_server_manager_bg.exe\"");
-                    regkey.Close();
-                }
-
-                var bsm_bg = new Process
-                {
-                    StartInfo = new ProcessStartInfo(PythonExe)
-                    {
-                        UseShellExecute = true,
-                        CreateNoWindow = false,
-                        Arguments = @AppDomain.CurrentDomain.BaseDirectory + @"\python\be_server_manager_bg.py",
-                    }
-                };
-                bsm_bg.Start();
-
-
                 Console.WriteLine("Start task...");
                 var dlLink = new Process
                 {
@@ -426,30 +372,101 @@ namespace bedrock_server_manager
                 string[] lb = new string[latestVersion.Split('.').Length - 1];
                 Array.Copy(latestVersion.Split('.'), 0, lb, 0, latestVersion.Split('.').Length - 1);
                 string lv = string.Join(".", lb);
-                if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
+                if (File.Exists(@cfgDATA[0].location + @"\bedrock_server.exe"))
                 {
-                    LoadServerSetting(@cfgDATA.location + @"\server.properties");
+                    LoadServerSetting(@cfgDATA[0].location + @"\server.properties");
                     launchButton.IsEnabled = true;
+                    serverConfigMainpanel.IsEnabled = true;
 
-                    サーバー名.Content = "サーバー名：" + cfgDATA.name;
-                    config_server_name.Text = cfgDATA.name;
-                    serverLocation.Text = cfgDATA.location;
-                    config_level_seed.Text = cfgDATA.seed;
-                    if (File.Exists(@cfgDATA.location + @"\version.txt"))
+                    サーバー名.Content = "サーバー名：" + cfgDATA[0].name;
+                    config_server_name.Text = cfgDATA[0].name;
+                    serverLocation.Text = cfgDATA[0].location;
+                    config_level_seed.Text = cfgDATA[0].seed;
+                    if (File.Exists(@cfgDATA[0].location + @"\version.txt"))
                     {
                         using (StreamReader sr = new StreamReader(
-                            @cfgDATA.location + @"\version.txt", Encoding.GetEncoding("UTF-8"))) {
+                            @cfgDATA[0].location + @"\version.txt", Encoding.GetEncoding("UTF-8")))
+                        {
                             currentVersion = sr.ReadToEnd().Replace("\r", "").Replace("\n", "");
                         }
                         Console.WriteLine("Latest Version: " + latestVersion);
                         Console.WriteLine("Current Version: " + currentVersion);
                         バージョン.Content = "バージョン：" + currentVersion;
-                        if (latestVersion == currentVersion){ Console.WriteLine("最新バージョンです。"); }
-                        else{ MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
+                        if (latestVersion == currentVersion) { Console.WriteLine("最新バージョンです。"); }
+                        else { MessageBox.Show("サーバーのアップデートがあります。\n「更新」ボタンを押して更新してください。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
                     }
                     else
-                    { MessageBox.Show("バージョンファイルが見つかりませんでした。\n現在のバージョンは不明ですが「更新」ボタンを押すことで、最新バージョンへのアップデート及びバージョンファイルの作成が行われます。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information); }
+                    {
+                        バージョン.Content = "バージョン不明";
+                        MessageBox.Show("バージョンファイルが見つかりませんでした。\n現在のバージョンは不明ですが「更新」ボタンを押すことで、最新バージョンへのアップデート及びバージョンファイルの作成が行われます。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }
+                else
+                {
+                    updateButton.Content = "インストール";
+                    サーバー名.Content = "BE Server Manager";
+                    バージョン.Content = "サーバーがインストールされていません。";
+                    serverLocation.Text = cfgDATA[0].location;
+                    serverConfigMainpanel.IsEnabled = false;
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("画面更新時にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine("Sorry. An error has occurred.\n\n" + err);
+                Close();
+            }
+        }
+
+        /// MainWindow Program
+        /// This program (below this comment) will execution when Program launced.
+
+        public MainWindow()
+        {
+            Console.WriteLine("Waiting initializing compotens...");
+            InitializeComponent();
+            Console.WriteLine("Components initialized.");
+            if (File.Exists(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json") == false)
+            {
+                Console.WriteLine("FirstSession dialog show!");
+                firstSession firstSession = new firstSession();
+                firstSession.ShowDialog();
+                Console.WriteLine("FirstSession dialog closed.");
+            }
+            try
+            {
+                BaseConfig[] cfgDATA = null;
+                using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
+                }
+
+                Console.WriteLine("Settings are loaded.");
+
+                if (!Directory.Exists(@cfgDATA[0].location)) { Directory.CreateDirectory(@cfgDATA[0].location); }
+
+                Microsoft.Win32.RegistryKey regkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
+                Console.WriteLine(regkey.GetValue("BEServerManagerBG"));
+                if (regkey.GetValue("BEServerManagerBG") == null)
+                {
+                    regkey.SetValue("BEServerManagerBG", "\"" + @AppDomain.CurrentDomain.BaseDirectory + "\\python3\\python.exe\" \"" + @AppDomain.CurrentDomain.BaseDirectory + "\\python\\be_server_manager_bg.py\"");
+                    regkey.Close();
+                }
+
+                var bsm_bg = new Process
+                {
+                    StartInfo = new ProcessStartInfo(PythonExe)
+                    {
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true,
+                        Arguments = @AppDomain.CurrentDomain.BaseDirectory + @"\python\be_server_manager_bg.py",
+                    }
+                };
+                bsm_bg.Start();
+
+                Initview(cfgDATA);
                 changeLog = 0;
             }
             catch (Exception err)
@@ -471,7 +488,7 @@ namespace bedrock_server_manager
                 IsFolderPicker = true,
             })
             {
-                if (cofd.ShowDialog() != CommonFileDialogResult.Ok){ return; }
+                if (cofd.ShowDialog() != CommonFileDialogResult.Ok) { return; }
                 serverLocation.Text = cofd.FileName;
             }
         }
@@ -492,7 +509,7 @@ namespace bedrock_server_manager
             {
                 MessageBoxResult ans = MessageBox.Show("保存していない項目があるようです。\n保存せずに終了してもよろしいですか？", "BE Server Manager", MessageBoxButton.OKCancel, MessageBoxImage.Exclamation);
                 Console.WriteLine(ans);
-                if (ans != MessageBoxResult.OK){ e.Cancel = true; }
+                if (ans != MessageBoxResult.OK) { e.Cancel = true; }
             }
         }
 
@@ -529,11 +546,11 @@ namespace bedrock_server_manager
             }
             Directory.CreateDirectory(@AppDomain.CurrentDomain.BaseDirectory + @"\tmp");
 
-            BaseConfig cfgDATA = null;
+            BaseConfig[] cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
 
             CopyToCache();
@@ -559,31 +576,43 @@ namespace bedrock_server_manager
             Console.WriteLine("Download link: " + downloadLink);
             latestVersion = downloadLink.Replace("https://minecraft.azureedge.net/bin-win/bedrock-server-", "").Replace(".zip", "");
             Console.WriteLine("Latest version: " + latestVersion);
-            mywebClient.DownloadFile(downloadLink, @"tmp\Minecraft_BedrockServer.zip");
-            DirectoryInfo gamedir = new DirectoryInfo(@cfgDATA.location);
-            try
+            IsEnabled = false;
+
+            await Task.Run(async () =>
             {
-                gamedir.Delete(true);
-                Directory.CreateDirectory(@cfgDATA.location);
-                ZipFile.ExtractToDirectory(@"tmp\Minecraft_BedrockServer.zip", @cfgDATA.location);
-            }
-            catch (IOException)
-            {
-                MessageBox.Show("アップデート中にエラーが発生しました。\nセーブデータのバックアップは「" + @AppDomain.CurrentDomain.BaseDirectory + @"\tmp" + "」内にあります。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                mywebClient.DownloadFile(downloadLink, @"tmp\Minecraft_BedrockServer.zip");
+                DirectoryInfo gamedir = new DirectoryInfo(@cfgDATA[0].location);
+                try
+                {
+                    gamedir.Delete(true);
+                    Directory.CreateDirectory(@cfgDATA[0].location);
+                    ZipFile.ExtractToDirectory(@"tmp\Minecraft_BedrockServer.zip", @cfgDATA[0].location);
+                }
+                catch (IOException)
+                {
+                    MessageBox.Show("アップデート中にエラーが発生しました。\nセーブデータのバックアップは「" + @AppDomain.CurrentDomain.BaseDirectory + @"\tmp" + "」内にあります。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                    return;
+                }
+
+                Encoding utf8 = Encoding.GetEncoding("UTF-8");
+                using (StreamWriter writer = new StreamWriter(@cfgDATA[0].location + @"\version.txt", false, utf8))
+                {
+                    writer.WriteLine(latestVersion);
+                }
+
+                await Task.Delay(1000);
+                CopyFromCache();
+                File.Delete(@"tmp\Minecraft_BedrockServer.zip");
+                MessageBox.Show("アップデートが完了しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                Dispatcher.Invoke(() =>
+                {
+                    IsEnabled = true;
+                    Initview(cfgDATA);
+                });
                 return;
-            }
+            });
 
-            Encoding utf8 = Encoding.GetEncoding("UTF-8");
-            using (StreamWriter writer = new StreamWriter(@cfgDATA.location + @"\version.txt", false, utf8))
-            {
-                writer.WriteLine(latestVersion);
-            }
 
-            await Task.Delay(1000);
-            CopyFromCache();
-            File.Delete(@"tmp\Minecraft_BedrockServer.zip");
-            MessageBox.Show("アップデートが完了しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
         }
 
         private void startServer(object sender, RoutedEventArgs e)
@@ -594,15 +623,15 @@ namespace bedrock_server_manager
                 Console.WriteLine(ans_c);
                 if (ans_c != MessageBoxResult.OK) { return; }
             }
-            BaseConfig cfgDATA = null;
+            BaseConfig[] cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
             var Minecraft = new Process
             {
-                StartInfo = new ProcessStartInfo(@cfgDATA.location + @"\bedrock_server.exe")
+                StartInfo = new ProcessStartInfo(@cfgDATA[0].location + @"\bedrock_server.exe")
                 {
                     UseShellExecute = true,
                     RedirectStandardOutput = false,
@@ -618,38 +647,39 @@ namespace bedrock_server_manager
         {
             try
             {
-                BaseConfig cfgDATA_bf = null;
+                BaseConfig[] cfgDATA_bf = null;
                 using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
                 {
                     JsonSerializer serializer = new JsonSerializer();
-                    cfgDATA_bf = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                    cfgDATA_bf = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
                 }
-                BaseConfig cfgDATA = new BaseConfig
-                {
+                BaseConfig[] cfgDATA = {new BaseConfig{
                     name = config_server_name.Text,
                     location = serverLocation.Text,
                     seed = config_level_seed.Text,
-                    update = @cfgDATA_bf.update,
-                    backup = @cfgDATA_bf.backup,
-                    backupTime = @cfgDATA_bf.backupTime,
-                    autoupdate = @cfgDATA_bf.autoupdate,
-                    autobackup = @cfgDATA_bf.autobackup,
-                    botToken = @cfgDATA_bf.botToken,
-                    botPrefix = @cfgDATA_bf.botPrefix
-                };
+                    update = @cfgDATA_bf[0].update,
+                    backup = @cfgDATA_bf[0].backup,
+                    backupTime = @cfgDATA_bf[0].backupTime,
+                    autoupdate = @cfgDATA_bf[0].autoupdate,
+                    autobackup = @cfgDATA_bf[0].autobackup,
+                    botToken = @cfgDATA_bf[0].botToken,
+                    botPrefix = @cfgDATA_bf[0].botPrefix
+                }};
+
                 サーバー名.Content = "サーバー名：" + config_server_name.Text;
                 string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
                 File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
 
                 SaveServerSetting(serverLocation.Text + @"\server.properties");
 
-                if (File.Exists(@cfgDATA.location + @"\bedrock_server.exe"))
+                if (File.Exists(@cfgDATA[0].location + @"\bedrock_server.exe"))
                 {
                     launchButton.IsEnabled = true;
                 }
 
                 changeLog = 0;
                 MessageBox.Show("保存しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+                Initview(cfgDATA);
                 return;
             }
             catch (Exception err)
@@ -676,9 +706,11 @@ namespace bedrock_server_manager
             MessageBox.Show(@"BE Server Manager
 Minecraft Vanilla Dedicated Server Manager for Bedrock Edition
 Version: " + ApplicationVersion + @"
-Developed by NattyanTV
+@nattyan-tv (NattyanTV)
 
-This application is not provided by Microsoft or Mojang in any way and has been developed independently.", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
+This application is not provided by Microsoft or Mojang in any way and has been developed independently.
+
+Copyright © 2001- Python Software Foundation; All Rights Reserved", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void openConfigDiscord(object sender, RoutedEventArgs e)

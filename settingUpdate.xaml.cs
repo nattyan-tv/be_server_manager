@@ -42,16 +42,16 @@ namespace bedrock_server_manager
         public settingUpdate()
         {
             InitializeComponent();
-            BaseConfig cfgDATA = null;
+            BaseConfig[] cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
-            Console.WriteLine(cfgDATA.update);
-            if (cfgDATA.autoupdate)
+            Console.WriteLine(cfgDATA[0].update);
+            if (cfgDATA[0].autoupdate)
             {
-                updateTime.Text = cfgDATA.update;
+                updateTime.Text = cfgDATA[0].update;
                 updateTime.IsEnabled = true;
                 AutoUpdate.IsChecked = true;
             }
@@ -67,25 +67,25 @@ namespace bedrock_server_manager
         {
             Console.WriteLine(updateTime.Text);
 
-            BaseConfig BASEcfgDATA = null;
+            BaseConfig[] BASEcfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                BASEcfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                BASEcfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
-            BaseConfig cfgDATA = new BaseConfig
+            BaseConfig[] cfgDATA = { new BaseConfig
             {
-                name = BASEcfgDATA.name,
-                location = @BASEcfgDATA.location,
-                seed = BASEcfgDATA.seed,
+                name = BASEcfgDATA[0].name,
+                location = @BASEcfgDATA[0].location,
+                seed = BASEcfgDATA[0].seed,
                 update = updateTime.Text,
-                backup = BASEcfgDATA.backup,
-                backupTime = BASEcfgDATA.backupTime,
+                backup = BASEcfgDATA[0].backup,
+                backupTime = BASEcfgDATA[0].backupTime,
                 autoupdate = (bool)AutoUpdate.IsChecked,
-                autobackup = BASEcfgDATA.autobackup,
-                botToken = BASEcfgDATA.botToken,
-                botPrefix = BASEcfgDATA.botPrefix
-            };
+                autobackup = BASEcfgDATA[0].autobackup,
+                botToken = BASEcfgDATA[0].botToken,
+                botPrefix = BASEcfgDATA[0].botPrefix
+            } };
             Console.WriteLine(updateTime.Text);
             Console.WriteLine(AutoUpdate.IsChecked);
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);

@@ -36,12 +36,12 @@
             <Label x:Name="ファイル" Content="ファイル場所：" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" FontSize="16" FontFamily="Yu Gothic UI"/>
             <TextBox x:Name="serverLocation" IsReadOnly="True" Margin="118,82,181,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="31" VerticalContentAlignment="Center" HorizontalContentAlignment="Left" FontSize="16" Text="/"/>
             <Button x:Name="launchButton" Content="起動" Margin="0,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="159" Height="31" FontSize="16" Click="startServer" IsEnabled="False"/>
-            <Button Content="更新" Margin="0,46,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="159" Height="31" FontSize="16" Click="updateServer"/>
+            <Button x:Name="updateButton" Content="更新" Margin="0,46,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="159" Height="31" FontSize="16" Click="updateServer"/>
             <Button Content="保存" Margin="0,82,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="74" Height="31" FontSize="16" Click="saveConfig"/>
             <Button Content="変更" Margin="0,82,95,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="74" Height="31" FontSize="16" Click="changeServerLocation"/>
 
         </Grid>
-        <ScrollViewer Margin="0,136,0,0">
+        <ScrollViewer x:Name="serverConfigMainpanel" Margin="0,136,0,0" IsEnabled="False">
             <Grid Background="#FFF7E1D8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>

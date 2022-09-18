@@ -82,18 +82,18 @@ namespace bedrock_server_manager
             InitializeComponent();
             /// jsonファイルから設定を読み込んで、Textとかに埋め込む。
             /// その際、nullだったらなにも入れないみたいな...
-            BaseConfig cfgDATA = null;
+            BaseConfig[] cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
-            if (cfgDATA.backup != null)
+            if (cfgDATA[0].backup != null)
             {
-                serverBackup.Text = @cfgDATA.backup;
-                backupTime.Text = cfgDATA.backupTime;
+                serverBackup.Text = @cfgDATA[0].backup;
+                backupTime.Text = cfgDATA[0].backupTime;
             }
-            if (cfgDATA.autobackup)
+            if (cfgDATA[0].autobackup)
             {
                 AutoBackup.IsChecked = true;
                 backupTime.IsEnabled = true;
@@ -112,25 +112,25 @@ namespace bedrock_server_manager
         private void saveSettings(object sender, RoutedEventArgs e)
         {
             backupTime.Text = backupTime.Text.Replace(":", "");
-            BaseConfig BASEcfgDATA = null;
+            BaseConfig[] BASEcfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                BASEcfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                BASEcfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
-            BaseConfig cfgDATA = new BaseConfig
+            BaseConfig[] cfgDATA = {new BaseConfig
             {
-                name = BASEcfgDATA.name,
-                location = @BASEcfgDATA.location,
-                seed = BASEcfgDATA.seed,
-                update = BASEcfgDATA.update,
+                name = BASEcfgDATA[0].name,
+                location = @BASEcfgDATA[0].location,
+                seed = BASEcfgDATA[0].seed,
+                update = BASEcfgDATA[0].update,
                 backup = serverBackup.Text,
                 backupTime = backupTime.Text,
-                autoupdate = BASEcfgDATA.autoupdate,
+                autoupdate = BASEcfgDATA[0].autoupdate,
                 autobackup = (bool)AutoBackup.IsChecked,
-                botToken = BASEcfgDATA.botToken,
-                botPrefix = BASEcfgDATA.botPrefix
-            };
+                botToken = BASEcfgDATA[0].botToken,
+                botPrefix = BASEcfgDATA[0].botPrefix
+            } };
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
             setted = true;
@@ -189,16 +189,16 @@ namespace bedrock_server_manager
                 MessageBox.Show("バックアップを保存する場所が指定されていません。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
-            BaseConfig cfgDATA = null;
+            BaseConfig[] cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
             DateTime dt = DateTime.Now;
             try
             {
-                BackUpThread(@cfgDATA.location, @backupNOWLocation.Text, @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
+                BackUpThread(@cfgDATA[0].location, @backupNOWLocation.Text, @dt.ToString("yyyy_MM_dd-HH_mm_ss"));
                 MessageBox.Show("バックアップに完了しました。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

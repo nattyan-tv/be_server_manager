@@ -67,9 +67,25 @@ namespace bedrock_server_manager
 
         private void saveAndStart(object sender, RoutedEventArgs e)
         {
+            if (server_name.Text == "" || serverLocation.Text == "")
+            {
+                MessageBox.Show("サーバー名かファイル場所が指定されていません。\nこれらは必須項目です。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
+            }
+            else if ((bool)AutoBackup.IsChecked && (backupTime.Text == "" || serverBackup.Text == ""))
+            {
+                MessageBox.Show("バックアップ間隔と場所が指定されていません。\nバックアップの設定を有効にする場合はこれらは必須項目です。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
+            }
+            else if ((bool)AutoUpdate.IsChecked && updateTime.Text == "")
+            {
+                MessageBox.Show("アップデート確認間隔が指定されていません。\nアップデートの設定を有効にする場合はこれらは必須項目です。", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
+            }
+
             backupTime.Text = backupTime.Text.Replace(":", "");
 
-            BaseConfig cfgDATA = new BaseConfig
+            BaseConfig[] cfgDATA = {new BaseConfig
             {
                 name = server_name.Text,
                 location = serverLocation.Text,
@@ -81,7 +97,7 @@ namespace bedrock_server_manager
                 autobackup = (bool)AutoBackup.IsChecked,
                 botToken = "",
                 botPrefix = ""
-            };
+            } };
             string json = JsonConvert.SerializeObject(cfgDATA, Formatting.Indented);
             File.WriteAllText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json", json);
             setted = true;

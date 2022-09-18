@@ -38,11 +38,11 @@ namespace bedrock_server_manager
         public settingDiscord()
         {
             InitializeComponent();
-            BaseConfig cfgDATA = null;
+            BaseConfig[] cfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                cfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                cfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
             DiscordBotSetting disSet = null;
 
@@ -61,8 +61,8 @@ namespace bedrock_server_manager
                 bot_users.Text = string.Join(",", disSet.bot_admins);
             }
 
-            bottoken.Password = cfgDATA.botToken;
-            botprefix.Text = cfgDATA.botPrefix;
+            bottoken.Password = cfgDATA[0].botToken;
+            botprefix.Text = cfgDATA[0].botPrefix;
 
             setted = false;
         }
@@ -77,25 +77,25 @@ namespace bedrock_server_manager
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            BaseConfig BASEcfgDATA = null;
+            BaseConfig[] BASEcfgDATA = null;
             using (StreamReader file = File.OpenText(@AppDomain.CurrentDomain.BaseDirectory + @"\setting.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                BASEcfgDATA = (BaseConfig)serializer.Deserialize(file, typeof(BaseConfig));
+                BASEcfgDATA = (BaseConfig[])serializer.Deserialize(file, typeof(BaseConfig[]));
             }
-            BaseConfig cfgDATA = new BaseConfig
+            BaseConfig[] cfgDATA = {new BaseConfig
             {
-                name = BASEcfgDATA.name,
-                location = @BASEcfgDATA.location,
-                seed = BASEcfgDATA.seed,
-                update = BASEcfgDATA.update,
-                backup = BASEcfgDATA.backup,
-                backupTime = BASEcfgDATA.backupTime,
-                autoupdate = BASEcfgDATA.autoupdate,
-                autobackup = BASEcfgDATA.autobackup,
+                name = BASEcfgDATA[0].name,
+                location = @BASEcfgDATA[0].location,
+                seed = BASEcfgDATA[0].seed,
+                update = BASEcfgDATA[0].update,
+                backup = BASEcfgDATA[0].backup,
+                backupTime = BASEcfgDATA[0].backupTime,
+                autoupdate = BASEcfgDATA[0].autoupdate,
+                autobackup = BASEcfgDATA[0].autobackup,
                 botToken = bottoken.Password,
                 botPrefix = botprefix.Text
-            };
+            } };
 
             DiscordBotSetting DisData = new DiscordBotSetting
             {
