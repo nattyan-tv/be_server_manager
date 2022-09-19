@@ -412,8 +412,8 @@ namespace bedrock_server_manager
             }
             catch (Exception err)
             {
-                MessageBox.Show("画面更新時にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
-                Console.WriteLine("Sorry. An error has occurred.\n\n" + err);
+                MessageBox.Show($"画面更新にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n{err.Message}\n{err.StackTrace}\n\n{err.Data}", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"Error handle (When refresh)\n{err.Message}\n{err.StackTrace}\n\n{err.Data}");
                 Close();
             }
         }
@@ -471,8 +471,8 @@ namespace bedrock_server_manager
             }
             catch (Exception err)
             {
-                MessageBox.Show("起動中にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n\n" + err, "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
-                Console.WriteLine("Sorry. An error has occurred.\n\n" + err);
+                MessageBox.Show($"起動中にエラーが発生しました。\n下記エラーログを開発者に見せると、何かを教えてくれるかもしれません。\n{err.Message}\n{err.StackTrace}\n\n{err.Data}", "BE Server Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"Error handle (When launch)\n{err.Message}\n{err.StackTrace}\n\n{err.Data}");
                 Close();
             }
         }
